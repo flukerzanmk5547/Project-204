@@ -1,0 +1,172 @@
+/* src/app/page.module.css */
+.container {
+  background-color: #f8fafc;
+  color: #0f172a;
+  min-height: 100vh;
+  font-family: sans-serif;
+  margin: 0;
+}
+
+/* แถบเมนูด้านบน */
+.navbar {
+  background-color: #002244;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 4px solid #00A3E0;
+  position: relative;
+  z-index: 10;
+}
+
+.shopName {
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navLinks a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navLinks a:hover {
+  color: #00A3E0;
+}
+
+/* แบนเนอร์ภาพสไลด์ */
+.hero {
+  position: relative;
+  color: #ffffff;
+  padding: 8rem 2rem;
+  text-align: center;
+  overflow: hidden;
+  background-color: #002244;
+}
+
+.heroBg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 1s ease-in-out;
+  z-index: 1;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 34, 68, 0.85) 0%, rgba(0, 51, 102, 0.85) 100%);
+  z-index: 2;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 3;
+}
+
+.heroContent h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.heroContent p {
+  font-size: 1.3rem;
+  color: #cbd5e1;
+  margin-bottom: 2.5rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.btnPrimary {
+  background-color: #00A3E0;
+  color: white;
+  border: none;
+  padding: 0.9rem 2.5rem;
+  font-size: 1.15rem;
+  font-weight: bold;
+  borderRadius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 163, 224, 0.5);
+}
+
+/* ส่วนแสดงสินค้า */
+.mainContent {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2.5rem;
+  color: #002244;
+  font-weight: bold;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.cardImage {
+  font-size: 4.5rem;
+  margin-bottom: 1rem;
+}
+
+.cardCategory {
+  font-size: 0.85rem;
+  color: #00A3E0;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.cardName {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem 0;
+  color: #002244;
+  font-weight: bold;
+}
+
+.cardPrice {
+  font-size: 1.2rem;
+  color: #ff4d4d;
+  font-weight: bold;
+  margin: 0 0 1.5rem 0;
+}
+
+.btnSecondary {
+  width: 100%;
+  background-color: #002244;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 0;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
