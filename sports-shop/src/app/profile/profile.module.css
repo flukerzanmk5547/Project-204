@@ -1,0 +1,262 @@
+.container {
+  background-color: #f8fafc;
+  color: #0f172a;
+  min-height: 100vh;
+  font-family: sans-serif;
+  margin: 0;
+}
+
+.miniNavbar {
+  background-color: #002244;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 4px solid #00A3E0;
+}
+
+.shopName {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.backLink {
+  text-decoration: none;
+  color: #cbd5e1;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: #00A3E0;
+}
+
+.mainContent {
+  padding: 3rem 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #002244;
+  font-weight: bold;
+}
+
+.subTitle {
+  color: #002244;
+  margin-top: 3rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.infoBox {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.profileView {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+/* 📸 กรอบรูปวงกลมใหญ่ */
+.avatarCircle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #002244;
+  border: 4px solid #00A3E0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* บังคับให้รูปที่ล้นออกมาตัดเหลี่ยมกลมเป๊ะๆ */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* 📸 กรอบรูปวงกลมเล็กตอนรีวิวรูปฟอร์ม */
+.avatarCircleSmall {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  border: 2px solid #00A3E0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ควบคุมรูปภาพ Custom จริงที่ดึงเข้ามากรอบ */
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* จัดสัดส่วนรูปภาพไม่ให้โย้และยืดเบี้ยว */
+}
+
+/* ตกแต่งปุ่มอัปโหลดรูปให้เก๋ไก๋ล้ำลึก */
+.fileInput {
+  display: none; /* ซ่อนปุ่มเทอะทะตัวจริงของระบบเบราว์เซอร์ */
+}
+
+.fileInputLabel {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.fileInputLabel:hover {
+  background-color: #f8fafc;
+  border-color: #00A3E0;
+  color: #00A3E0;
+}
+
+.profileDetails p {
+  margin: 0.6rem 0;
+  font-size: 1.05rem;
+  color: #334155;
+}
+
+.highlightText {
+  color: #00A3E0;
+  font-weight: bold;
+}
+
+.btnEdit {
+  margin-top: 1rem;
+  background-color: transparent;
+  border: 1px solid #00A3E0;
+  color: #00A3E0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnEdit:hover {
+  background-color: #00A3E0;
+  color: white;
+}
+
+.profileForm h3 {
+  margin-top: 0;
+  color: #002244;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.inputGroup label {
+  font-weight: bold;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.inputGroup input, .inputGroup textarea {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.inputGroup input:focus, .inputGroup textarea:focus {
+  border-color: #00A3E0;
+  box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.15);
+}
+
+.btnFormGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btnSave {
+  background-color: #00A3E0;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btnCancel {
+  background-color: #e2e8f0;
+  color: #475569;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.cardImage {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.cardCategory {
+  font-size: 0.85rem;
+  color: #00A3E0;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.cardName {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem 0;
+  color: #002244;
+  font-weight: bold;
+}
+
+.cardPrice {
+  font-size: 1.15rem;
+  color: #ff4d4d;
+  font-weight: bold;
+}
+
+.emptyText {
+  color: #64748b;
+  font-style: italic;
+  margin-top: 1.5rem;
+}
