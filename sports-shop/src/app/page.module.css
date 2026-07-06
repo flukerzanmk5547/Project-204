@@ -42,6 +42,93 @@
   color: #00A3E0;
 }
 
+/* ==========================================================================
+   ✨ SPORTS SHOP DROPDOWN STYLES (อัปเดตระยะแก้บั๊กเมาส์หลุดเรียบร้อยจ้า)
+   ========================================================================== */
+
+/* กล่องห่อหุ้มโปรไฟล์ */
+.profileDropdownContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  height: 100%;
+  padding: 0 0.5rem;
+}
+
+/* เมื่อเอาเมาส์มา Hover ที่กล่องโปรไฟล์ ให้เปิดเมนูลอยขึ้นมาทันที */
+.profileDropdownContainer:hover .dropdownMenu {
+  display: flex !important;
+}
+
+/* ตัวกล่องเมนูสีขาวลอยสับ ๆ (ดึงขึ้นแนบชิดขอบNavbarเพื่อแก้บั๊กเมาส์หลุด) */
+.dropdownMenu {
+  position: absolute;
+  top: 100%; /* อยู่ติดขอบล่างสุดของ Navbar ทันที */
+  right: 0;
+  background-color: #ffffff;
+  min-width: 160px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0;
+  display: none; /* ซ่อนไว้ก่อนเริ่มต้น */
+  flex-direction: column;
+  z-index: 99999 !important; /* ยกเลเยอร์ให้สูงลิ่วเหนือทุกก้อนแบนเนอร์ */
+}
+
+/* ติ่งสามเหลี่ยมชี้ขึ้นด้านบนแบบ Shopee (ขยับตำแหน่งให้สมดุลสอดรับกันพอดีคำ) */
+.dropdownTriangle {
+  position: absolute;
+  top: -5px; /* ขยับหลบขึ้นไปข้างบนให้สวยงามพอดีจ้า */
+  right: 25px;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  transform: rotate(45deg);
+  box-shadow: -3px -3px 5px rgba(0, 0, 0, 0.04);
+}
+
+/* ตกแต่งลิงก์เมนูภายในกล่องตอน Hover ชี้ */
+.dropdownLink {
+  padding: 0.6rem 1.2rem;
+  color: #333333 !important; /* บังคับให้เป็นสีเข้มเห็นชัดเจน */
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: block;
+  transition: background-color 0.2s;
+  font-weight: normal !important;
+}
+
+.dropdownLink:hover {
+  background-color: #f1f5f9 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อนนุ่ม ๆ */
+  color: #00A3E0 !important; /* ไฮไลต์ตัวหนังสือให้เป็นสีฟ้าประจำร้าน */
+}
+
+/* ปุ่มออกจากระบบ */
+.logoutButton {
+  padding: 0.6rem 1.2rem;
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  font-weight: bold;
+  display: block;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.logoutButton:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* เส้นคั่นกลางบาง ๆ แบ่งสัดส่วน */
+.dropdownDivider {
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  margin: 0.4rem 0;
+  width: 100%;
+}
+
+/* ========================================================================== */
+
 /* แบนเนอร์ภาพสไลด์ */
 .hero {
   position: relative;
@@ -94,7 +181,7 @@
   padding: 0.9rem 2.5rem;
   font-size: 1.15rem;
   font-weight: bold;
-  borderRadius: 9999px;
+  border-radius: 9999px;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 163, 224, 0.5);
 }
@@ -151,6 +238,10 @@
   margin: 0 0 0.5rem 0;
   color: #002244;
   font-weight: bold;
+}
+
+.border {
+  border: 1px solid #cbd5e1;
 }
 
 .cardPrice {

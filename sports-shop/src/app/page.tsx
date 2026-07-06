@@ -1,9 +1,24 @@
-// src/app/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link'; // 🔥 ดึงระบบจัดการลิงก์ข้ามหน้าของ Next.js มาใช้
-import styles from './page.module.css'; // 🔥 ดึงไฟล์ CSS ที่เราแยกไว้ตะกี้เข้ามา
+import Link from 'next/link'; 
+import styles from './page.module.css'; 
+
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  price: string;
+  image: string;
+}
+
+interface UserProfile {
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  avatar?: string; 
+}
 
 export default function HomePage() {
   const backgroundImages = [
@@ -13,6 +28,9 @@ export default function HomePage() {
   ];
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -21,7 +39,47 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [backgroundImages.length]);
 
-  const products = [
+  useEffect(() => {
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      setCurrentUser(parsedUser);
+      
+      // 🎯 ดึงคีย์รายการถูกใจเฉพาะของอีเมลบัญชีนั้น ๆ แยกกระเป๋ากันชัดเจน
+      const storedFavs = localStorage.getItem(`wishlist_${parsedUser.email}`);
+      if (storedFavs) {
+        setFavorites(JSON.parse(storedFavs));
+      } else {
+        setFavorites([]);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    setCurrentUser(null);
+    window.location.reload(); 
+  };
+
+  const toggleFavorite = (productId: number) => {
+    if (!currentUser) {
+      alert('กรุณาเข้าสู่ระบบก่อนกดถูกใจสินค้านะคะ!');
+      return;
+    }
+
+    let updatedFavs = [...favorites];
+    if (favorites.includes(productId)) {
+      updatedFavs = updatedFavs.filter(id => id !== productId);
+    } else {
+      updatedFavs.push(productId);
+    }
+    setFavorites(updatedFavs);
+    
+    // 🎯 บันทึกรายการถูกใจลงคีย์เฉพาะที่ผูกไว้กับอีเมลแต่ละคน สมัครใหม่กี่ไอดีก็ไม่ชนกัน
+    localStorage.setItem(`wishlist_${currentUser.email}`, JSON.stringify(updatedFavs));
+  };
+
+  const products: Product[] = [
     { id: 1, name: "Pro Run Zoom X", category: "รองเท้าวิ่ง", price: "4,500 บาท", image: "👟" },
     { id: 2, name: "Aero Speed 100", category: "ไม้แบดมินตัน", price: "2,800 บาท", image: "🏸" },
     { id: 3, name: "Super Dry Fit Jersey", category: "เสื้อผ้ากีฬา", price: "990 บาท", image: "👕" }
@@ -29,27 +87,75 @@ export default function HomePage() {
 
   return (
     <div className={styles.container}>
-      {/* Navbar ส่วนบน */}
+      {/* Navbar */}
       <nav className={styles.navbar}>
         <div>
           <span className={styles.shopName}>SPORTS SHOP</span>
         </div>
-        <div className={styles.navLinks}>
+        <div className={styles.navLinks} style={{ display: 'flex', alignItems: 'center' }}>
           <Link href="/">หน้าแรก</Link>
           <Link href="/products">สินค้าทั้งหมด</Link>
           <Link href="/cart">ตะกร้าสินค้า</Link>
-          <Link href="/login">เข้าสู่ระบบ</Link>
+          
+          {currentUser ? (
+            <div 
+              className={styles.profileDropdownContainer}
+              onMouseEnter={() => setIsDropdownOpen(true)}  
+              onMouseLeave={() => setIsDropdownOpen(false)} 
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: '#00A3E0', 
+                  color: '#ffffff',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '0.9rem',
+                  border: '1.5px solid #ffffff',
+                  userSelect: 'none',
+                  overflow: 'hidden' 
+                }}>
+                  {currentUser.avatar ? (
+                    <img 
+                      src={currentUser.avatar} 
+                      alt="Nav Profile" 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    currentUser.name.charAt(0).toUpperCase() 
+                  )}
+                </div>
+                <span style={{ color: '#ffffff', fontWeight: '500', fontSize: '0.95rem' }}>
+                  {currentUser.name}
+                </span>
+              </div>
+
+              <div 
+                className={styles.dropdownMenu} 
+                style={{ display: isDropdownOpen ? 'flex' : 'none' }}
+              >
+                <div className={styles.dropdownTriangle}></div>
+                <Link href="/profile" className={styles.dropdownLink}>โปรไฟล์ของฉัน</Link>
+                <Link href="/address" className={styles.dropdownLink}>ที่อยู่ของฉัน</Link>
+                <Link href="/orders" className={styles.dropdownLink}>ประวัติการสั่งซื้อ</Link>
+                <hr className={styles.dropdownDivider} />
+                <div onClick={handleLogout} className={styles.logoutButton}>ออกจากระบบ</div>
+              </div>
+            </div>
+          ) : (
+            <Link href="/login">เข้าสู่ระบบ</Link>
+          )}
         </div>
       </nav>
 
-      {/* Hero Banner ภาพสไลด์ */}
+      {/* Hero */}
       <header className={styles.hero}>
-        <div 
-          className={styles.heroBg} 
-          style={{ backgroundImage: `url(${backgroundImages[currentImageIndex]})` }} 
-        />
+        <div className={styles.heroBg} style={{ backgroundImage: `url(${backgroundImages[currentImageIndex]})` }} />
         <div className={styles.heroOverlay} />
-        
         <div className={styles.heroContent}>
           <h1>WELCOME TO SPORTS SHOP</h1>
           <p>ศูนย์รวมอุปกรณ์กีฬาและเสื้อผ้าแบรนด์แท้ระดับพรีเมียมคัดสรรเพื่อคุณ</p>
@@ -59,13 +165,28 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* โซนสินค้าแนะนำ */}
+      {/* สินค้าแนะนำ */}
       <main className={styles.mainContent}>
         <h2 className={styles.sectionTitle}>🔥 สินค้าแนะนำยอดฮิต</h2>
         
         <div className={styles.grid}>
           {products.map((product) => (
-            <div key={product.id} className={styles.card}>
+            <div key={product.id} className={styles.card} style={{ position: 'relative' }}>
+              <button 
+                onClick={() => toggleFavorite(product.id)}
+                style={{
+                  position: 'absolute', top: '12px', right: '12px',
+                  backgroundColor: '#ffffff', border: 'none', borderRadius: '50%',
+                  width: '32px', height: '32px', display: 'flex', justifyContent: 'center',
+                  alignItems: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  fontSize: '1.1rem', zIndex: 10, transition: 'transform 0.1s'
+                }}
+                onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.85)'}
+                onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                {favorites.includes(product.id) ? '❤️' : '🖤'}
+              </button>
+
               <div className={styles.cardImage}>{product.image}</div>
               <span className={styles.cardCategory}>{product.category}</span>
               <h3 className={styles.cardName}>{product.name}</h3>
