@@ -3,14 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link'; 
 import styles from './page.module.css'; 
-
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  price: string;
-  image: string;
-}
+// 🎯 เชื่อมต่อกับไฟล์คลังข้อมูลกลางเพื่อให้แสดงรูปภาพและข้อมูลชุดเดียวกัน
+import { ALL_PRODUCTS, Product } from './data/products';
 
 interface UserProfile {
   name: string;
@@ -45,7 +39,6 @@ export default function HomePage() {
       const parsedUser = JSON.parse(user);
       setCurrentUser(parsedUser);
       
-      // 🎯 ดึงคีย์รายการถูกใจเฉพาะของอีเมลบัญชีนั้น ๆ แยกกระเป๋ากันชัดเจน
       const storedFavs = localStorage.getItem(`wishlist_${parsedUser.email}`);
       if (storedFavs) {
         setFavorites(JSON.parse(storedFavs));
@@ -74,16 +67,8 @@ export default function HomePage() {
       updatedFavs.push(productId);
     }
     setFavorites(updatedFavs);
-    
-    // 🎯 บันทึกรายการถูกใจลงคีย์เฉพาะที่ผูกไว้กับอีเมลแต่ละคน สมัครใหม่กี่ไอดีก็ไม่ชนกัน
     localStorage.setItem(`wishlist_${currentUser.email}`, JSON.stringify(updatedFavs));
   };
-
-  const products: Product[] = [
-    { id: 1, name: "Pro Run Zoom X", category: "รองเท้าวิ่ง", price: "4,500 บาท", image: "👟" },
-    { id: 2, name: "Aero Speed 100", category: "ไม้แบดมินตัน", price: "2,800 บาท", image: "🏸" },
-    { id: 3, name: "Super Dry Fit Jersey", category: "เสื้อผ้ากีฬา", price: "990 บาท", image: "👕" }
-  ];
 
   return (
     <div className={styles.container}>
@@ -170,7 +155,7 @@ export default function HomePage() {
         <h2 className={styles.sectionTitle}>🔥 สินค้าแนะนำยอดฮิต</h2>
         
         <div className={styles.grid}>
-          {products.map((product) => (
+          {ALL_PRODUCTS.map((product: Product) => (
             <div key={product.id} className={styles.card} style={{ position: 'relative' }}>
               <button 
                 onClick={() => toggleFavorite(product.id)}
@@ -187,9 +172,33 @@ export default function HomePage() {
                 {favorites.includes(product.id) ? '❤️' : '🖤'}
               </button>
 
-              <div className={styles.cardImage}>{product.image}</div>
+              {/* 🎯 [จุดแก้ไข]: เปลี่ยนมาใช้กล่องดึงรูปภาพ และดัก Error ล้างปัญหาหน้าจอโล่ง/อิโมจิไม่เข้าพวก */}
+              <div className={styles.cardImage}>
+                {product.image && product.image.startsWith('http') ? (
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                
+                <span 
+                  style={{ 
+                    display: (product.image && product.image.startsWith('http')) ? 'none' : 'flex' 
+                  }}
+                  className={styles.fallbackEmoji}
+                >
+                </span>
+              </div>
+
               <span className={styles.cardCategory}>{product.category}</span>
               <h3 className={styles.cardName}>{product.name}</h3>
+              {/* เติมส่วนคำอธิบายสินค้าสั้น ๆ ให้การ์ดดูมีสไตล์ขึ้น */}
+              <p className={styles.cardDescription}>{product.description}</p>
               <p className={styles.cardPrice}>{product.price}</p>
               <button className={styles.btnSecondary}>ดูรายละเอียดสินค้า</button>
             </div>

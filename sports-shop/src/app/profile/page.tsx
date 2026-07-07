@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './profile.module.css';
+// 🎯 ดึงข้อมูลสินค้าจากไฟล์คลังกลางจุดเดียว
+import { ALL_PRODUCTS } from '../data/products';
 
 interface UserProfile {
   name: string;
@@ -10,25 +12,19 @@ interface UserProfile {
   phone?: string;
   address?: string;
   avatar?: string;
-  memberLevel?: string; // เก็บระดับสมาชิกของลูกค้า
+  memberLevel?: string;
 }
 
 export default function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [favIds, setFavIds] = useState<number[]>([]);
   
-  // 📝 States สำหรับโหมดแก้ไขข้อมูล
+  // States สำหรับโหมดแก้ไขข้อมูล
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editAvatar, setEditAvatar] = useState<string>('');
-
-  const allProducts = [
-    { id: 1, name: "Pro Run Zoom X", category: "รองเท้าวิ่ง", price: "4,500 บาท", image: "👟" },
-    { id: 2, name: "Aero Speed 100", category: "ไม้แบดมินตัน", price: "2,800 บาท", image: "🏸" },
-    { id: 3, name: "Super Dry Fit Jersey", category: "เสื้อผ้ากีฬา", price: "990 บาท", image: "👕" }
-  ];
 
   useEffect(() => {
     const user = localStorage.getItem('currentUser');
@@ -40,7 +36,6 @@ export default function ProfilePage() {
       setEditAddress(parsedUser.address || '');
       setEditAvatar(parsedUser.avatar || ''); 
 
-      // 🎯 ดึงคีย์รายการหัวใจแยกรายบุคคลตามอีเมลไอดีของตนเอง
       const storedFavs = localStorage.getItem(`wishlist_${parsedUser.email}`);
       if (storedFavs) {
         setFavIds(JSON.parse(storedFavs));
@@ -50,7 +45,6 @@ export default function ProfilePage() {
     }
   }, []);
 
-  // 📱 ฟังก์ชัน Auto Format จัดระเบียบเบอร์โทรศัพท์ตอนพิมพ์ (0XX-XXX-XXXX)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value.replace(/\D/g, '');
     const trimmed = input.substring(0, 10);
@@ -65,7 +59,6 @@ export default function ProfilePage() {
     setEditPhone(formatted);
   };
 
-  // 📸 ฟังก์ชันแปลงไฟล์รูปภาพเป็น Base64
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -77,7 +70,6 @@ export default function ProfilePage() {
     }
   };
 
-  // 💾 บันทึกข้อมูลลงเครื่องอัปเดตเข้าคลังหลัก (allUsers)
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -90,11 +82,9 @@ export default function ProfilePage() {
       avatar: editAvatar 
     };
 
-    // 1. บันทึกลงเซสชันกระเป๋าปัจจุบัน
     setCurrentUser(updatedUser);
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
 
-    // 🛠️ 2. วิ่งไปอัปเดตข้อมูลรูปภาพและเบอร์โทรกลับเข้าสู่คลังผู้ใช้รวม (allUsers) 
     const allUsersData = localStorage.getItem('allUsers');
     if (allUsersData) {
       const usersList = JSON.parse(allUsersData);
@@ -118,7 +108,8 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
-  const favoriteProducts = allProducts.filter(p => favIds.includes(p.id));
+  // 🎯 กรองสินค้าอัตโนมัติจากไฟล์ข้อมูลกลาง โดยเทียบกับ ID ที่ผู้ใช้กดไลก์ไว้
+  const favoriteProducts = ALL_PRODUCTS.filter(p => favIds.includes(p.id));
 
   return (
     <div className={styles.container}>
@@ -133,7 +124,6 @@ export default function ProfilePage() {
         {currentUser ? (
           <div className={styles.infoBox}>
             {!isEditing ? (
-              /* 👀 โหมดแสดงผลปกติ */
               <div className={styles.profileView}>
                 <div className={styles.avatarCircle}>
                   {currentUser.avatar ? (
@@ -147,13 +137,11 @@ export default function ProfilePage() {
                   <p><strong>อีเมลบัญชี:</strong> {currentUser.email}</p>
                   <p><strong>เบอร์โทรศัพท์:</strong> {currentUser.phone || 'ยังไม่มีข้อมูลเบอร์โทรศัพท์ 📞'}</p>
                   <p><strong>ที่อยู่จัดส่ง:</strong> {currentUser.address || 'ยังไม่มีข้อมูลที่อยู่จัดส่ง 🏠'}</p>
-                  {/* 🎯 [ปรับระดับสมาชิก]: ถ้าไม่มีข้อมูลยศ ให้แสดงว่ายังไม่มีระดับสมาชิกก่อนเลยจ้า */}
                   <p><strong>ระดับสมาชิก:</strong> {currentUser.memberLevel || 'ยังไม่มีระดับสมาชิก 🏅'}</p>
                   <button className={styles.btnEdit} onClick={() => setIsEditing(true)}>⚙️ แก้ไขข้อมูลโปรไฟล์</button>
                 </div>
               </div>
             ) : (
-              /* 📝 โหมดแก้ไขพร้อมช่องอัปโหลดรูป */
               <form onSubmit={handleSaveProfile} className={styles.profileForm}>
                 <h3>🛠️ แก้ไขข้อมูลส่วนตัว</h3>
                 
@@ -221,7 +209,34 @@ export default function ProfilePage() {
           <div className={styles.grid}>
             {favoriteProducts.map(product => (
               <div key={product.id} className={styles.card}>
-                <div className={styles.cardImage}>{product.image}</div>
+                <div className={styles.cardImage}>
+                  {product.image && product.image.startsWith('http') ? (
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      onError={(e) => {
+                        // ถ้าโหลดรูปภาพไม่ขึ้น (เช่น URL เสีย หรือไม่มีเน็ต) ให้ซ่อนรูปนี้และสลับไปแสดงอิโมจิแทนทันที
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} 
+                    />
+                  ) : null}
+                  
+                  {/* กล่องแสดงอิโมจิสำรอง (จะทำงานเมื่อไม่มี Link รูป หรือรูปโหลดไม่ขึ้น) */}
+                  <span 
+                    style={{ 
+                      display: (product.image && product.image.startsWith('http')) ? 'none' : 'flex', 
+                      fontSize: '2.5rem', 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      height: '100%' 
+                    }}
+                  >
+                    {product.displayImg || "👕"}
+                  </span>
+                </div>
                 <span className={styles.cardCategory}>{product.category}</span>
                 <h4 className={styles.cardName}>{product.name}</h4>
                 <p className={styles.cardPrice}>{product.price}</p>
@@ -229,7 +244,7 @@ export default function ProfilePage() {
             ))}
           </div>
         ) : (
-          <p className={styles.emptyText}>ยังไม่มีสินค้าที่กดถูกใจไว้เลย ลองไปกดหัวใจที่หน้าแรกดูน้าเธอ!</p>
+          <p className={styles.emptyText}>ยังไม่มีสินค้าที่กดถูกใจไว้เลย ลองไปกดหัวใจดูน้า</p>
         )}
       </main>
     </div>

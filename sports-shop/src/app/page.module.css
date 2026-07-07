@@ -1,4 +1,3 @@
-/* src/app/page.module.css */
 .container {
   background-color: #f8fafc;
   color: #0f172a;
@@ -43,10 +42,8 @@
 }
 
 /* ==========================================================================
-   ✨ SPORTS SHOP DROPDOWN STYLES (อัปเดตระยะแก้บั๊กเมาส์หลุดเรียบร้อยจ้า)
+   ✨ SPORTS SHOP DROPDOWN STYLES
    ========================================================================== */
-
-/* กล่องห่อหุ้มโปรไฟล์ */
 .profileDropdownContainer {
   position: relative;
   display: flex;
@@ -56,30 +53,27 @@
   padding: 0 0.5rem;
 }
 
-/* เมื่อเอาเมาส์มา Hover ที่กล่องโปรไฟล์ ให้เปิดเมนูลอยขึ้นมาทันที */
 .profileDropdownContainer:hover .dropdownMenu {
   display: flex !important;
 }
 
-/* ตัวกล่องเมนูสีขาวลอยสับ ๆ (ดึงขึ้นแนบชิดขอบNavbarเพื่อแก้บั๊กเมาส์หลุด) */
 .dropdownMenu {
   position: absolute;
-  top: 100%; /* อยู่ติดขอบล่างสุดของ Navbar ทันที */
+  top: 100%;
   right: 0;
   background-color: #ffffff;
   min-width: 160px;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   padding: 0.5rem 0;
-  display: none; /* ซ่อนไว้ก่อนเริ่มต้น */
+  display: none;
   flex-direction: column;
-  z-index: 99999 !important; /* ยกเลเยอร์ให้สูงลิ่วเหนือทุกก้อนแบนเนอร์ */
+  z-index: 99999 !important;
 }
 
-/* ติ่งสามเหลี่ยมชี้ขึ้นด้านบนแบบ Shopee (ขยับตำแหน่งให้สมดุลสอดรับกันพอดีคำ) */
 .dropdownTriangle {
   position: absolute;
-  top: -5px; /* ขยับหลบขึ้นไปข้างบนให้สวยงามพอดีจ้า */
+  top: -5px;
   right: 25px;
   width: 10px;
   height: 10px;
@@ -88,10 +82,9 @@
   box-shadow: -3px -3px 5px rgba(0, 0, 0, 0.04);
 }
 
-/* ตกแต่งลิงก์เมนูภายในกล่องตอน Hover ชี้ */
 .dropdownLink {
   padding: 0.6rem 1.2rem;
-  color: #333333 !important; /* บังคับให้เป็นสีเข้มเห็นชัดเจน */
+  color: #333333 !important;
   text-decoration: none;
   font-size: 0.9rem;
   display: block;
@@ -100,11 +93,10 @@
 }
 
 .dropdownLink:hover {
-  background-color: #f1f5f9 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อนนุ่ม ๆ */
-  color: #00A3E0 !important; /* ไฮไลต์ตัวหนังสือให้เป็นสีฟ้าประจำร้าน */
+  background-color: #f1f5f9 !important;
+  color: #00A3E0 !important;
 }
 
-/* ปุ่มออกจากระบบ */
 .logoutButton {
   padding: 0.6rem 1.2rem;
   color: #ff4d4d;
@@ -119,15 +111,12 @@
   background-color: #f1f5f9 !important;
 }
 
-/* เส้นคั่นกลางบาง ๆ แบ่งสัดส่วน */
 .dropdownDivider {
   border: none;
   border-top: 1px solid #f1f5f9;
   margin: 0.4rem 0;
   width: 100%;
 }
-
-/* ========================================================================== */
 
 /* แบนเนอร์ภาพสไลด์ */
 .hero {
@@ -215,14 +204,36 @@
   border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 2rem 1.5rem;
-  text-align: center;
+  padding: 1.5rem;
 }
 
+/* 🎯 [แก้ไขจุดเด่น]: ล็อกขนาดรูปหน้าแรก ตีเส้นกรอบ และสัดส่วนเท่ากันทุกชิ้น */
 .cardImage {
-  font-size: 4.5rem;
+  width: 100%;
+  height: 200px; /* บังคับให้สูง 200px เท่ากันทั้งหมด */
+  background-color: #f8fafc;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0; /* ขีดกรอบล้อมรอบรูปภาพสินค้า */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+/* จัดสัดส่วนภาพถ่ายจริง ไม่ให้บิดเบี้ยว */
+.cardImage img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.fallbackEmoji {
+  font-size: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .cardCategory {
@@ -231,6 +242,8 @@
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
+  text-align: left;
+  width: 100%;
 }
 
 .cardName {
@@ -238,17 +251,29 @@
   margin: 0 0 0.5rem 0;
   color: #002244;
   font-weight: bold;
+  text-align: left;
+  width: 100%;
 }
 
-.border {
-  border: 1px solid #cbd5e1;
+.cardDescription {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+  text-align: left;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cardPrice {
   font-size: 1.2rem;
   color: #ff4d4d;
   font-weight: bold;
-  margin: 0 0 1.5rem 0;
+  margin: auto 0 1.5rem 0; /* ผลักดันราคาให้ชิดขอบล่างเท่ากันเสมอ */
+  text-align: left;
+  width: 100%;
 }
 
 .btnSecondary {
@@ -260,4 +285,9 @@
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnSecondary:hover {
+  background-color: #003366;
 }
