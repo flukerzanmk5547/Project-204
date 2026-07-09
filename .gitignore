@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+.env
+.next/
+dist/
+*.log
+.turbo/
+sport-store-api/.env
