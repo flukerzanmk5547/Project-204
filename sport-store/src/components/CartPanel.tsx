@@ -2,6 +2,7 @@
 
 import { ChevronLeft, X, Minus, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useCart } from "@/lib/CartContext";
 
 export interface CartProduct {
   id: string | number;
@@ -24,6 +25,7 @@ const sizes = [
 ];
 
 export default function CartPanel({ isOpen, onClose, product }: CartPanelProps) {
+  const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("ไซส์เดียว");
   const [added, setAdded] = useState(false);
@@ -44,6 +46,17 @@ export default function CartPanel({ isOpen, onClose, product }: CartPanelProps) 
   if (!product) return null;
 
   const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image: product.image,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      discount: product.discount,
+      size: selectedSize,
+      quantity,
+    });
     setAdded(true);
     setTimeout(() => {
       setAdded(false);

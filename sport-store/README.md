@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sport Store — Frontend
 
-## Getting Started
+ส่วนหน้าเว็บ (frontend) ของ Project 204 - Sport Store พัฒนาด้วย Next.js (App Router) เชื่อมต่อข้อมูลผ่าน backend API (`sport-store-api`) แสดงสินค้า หมวดหมู่ โปรโมชัน รายละเอียดสินค้า ตะกร้า ระบบสมาชิก บัญชีผู้ใช้ คำสั่งซื้อ ที่อยู่จัดส่ง สินค้าโปรด และการชำระเงิน
 
-First, run the development server:
+## เทคโนโลยีที่ใช้
+
+- Next.js (App Router) + React + TypeScript
+- Tailwind CSS
+- Lucide React (ไอคอน)
+- ESLint
+
+## เริ่มต้นใช้งาน
+
+ติดตั้ง dependencies
+
+```bash
+npm install
+```
+
+สร้างไฟล์ `.env.local` แล้วกำหนด URL ของ backend API
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+รัน development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิดเว็บที่ [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> ต้องรัน `sport-store-api` ที่พอร์ต 4000 ควบคู่กันเพื่อให้ข้อมูลสินค้า/บัญชี/คำสั่งซื้อทำงานครบ ดูรายละเอียดการตั้งค่า backend ได้ที่ README หลักของโปรเจกต์
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## หน้าหลัก
 
-## Learn More
+| Route | รายละเอียด |
+| --- | --- |
+| `/` | หน้าแรก hero banner หมวดหมู่ ดีล และสินค้าแนะนำ |
+| `/login` | เข้าสู่ระบบ |
+| `/register` | สมัครสมาชิก |
+| `/cart` | ตะกร้าสินค้า |
+| `/checkout` | ชำระเงิน เลือกที่อยู่ วิธีจัดส่ง และชำระผ่าน QR พร้อมเพย์ |
+| `/category/[...slug]` | หมวดหมู่สินค้าแบบหลายระดับ |
+| `/product/[id]` | รายละเอียดสินค้า |
+| `/favorites` | สินค้าโปรด |
+| `/account` | บัญชีของฉัน (รวมเมนู) |
+| `/account/orders` | ประวัติคำสั่งซื้อ |
+| `/account/orders/[id]` | รายละเอียดคำสั่งซื้อ |
+| `/account/addresses` | สมุดที่อยู่จัดส่ง |
 
-To learn more about Next.js, take a look at the following resources:
+## โครงสร้างโค้ด
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+src/
+  app/            # หน้าเพจตาม App Router
+  components/     # คอมโพเนนต์ UI (Header, Footer, Hero, การ์ดสินค้า ฯลฯ)
+  lib/            # API client และ Context
+    api.ts            # ตัวเรียก backend API
+    AuthContext.tsx   # จัดการสถานะผู้ใช้/token
+    CartContext.tsx   # จัดการตะกร้าสินค้า (localStorage)
+    FavoritesContext.tsx  # จัดการสินค้าโปรด (localStorage)
+    thaiPostalData.ts # ข้อมูล/ตัวช่วยที่อยู่ไทย (จังหวัด/อำเภอ/รหัสไปรษณีย์)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## สคริปต์
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` — รัน development server
+- `npm run build` — build สำหรับ production
+- `npm run start` — รัน production server
+- `npm run lint` — ตรวจสอบโค้ดด้วย ESLint

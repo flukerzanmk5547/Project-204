@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import Footer from "@/components/Footer";
+import { useFavorites } from "@/lib/FavoritesContext";
 import {
   Star,
   ChevronRight,
@@ -105,6 +106,8 @@ function getProduct(id: string): ProductData {
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const product = getProduct(id);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const fav = isFavorite(product.id);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -228,8 +231,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   />
                 </div>
                 <div className="absolute top-3 right-3 flex flex-col gap-2">
-                  <button className="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center hover:bg-gray-50">
-                    <Heart size={20} className="text-text-secondary" />
+                  <button
+                    onClick={() =>
+                      toggleFavorite({
+                        id: product.id,
+                        name: product.name,
+                        brand: product.brand,
+                        image: product.images[0],
+                        price: product.price,
+                        rating: product.rating,
+                        reviews: product.reviews,
+                      })
+                    }
+                    className="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center hover:bg-gray-50"
+                    aria-label="เพิ่มในสินค้าโปรด"
+                  >
+                    <Heart
+                      size={20}
+                      className={
+                        fav ? "fill-red-500 text-red-500" : "text-text-secondary"
+                      }
+                    />
                   </button>
                   <button className="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center hover:bg-gray-50">
                     <Share2 size={20} className="text-text-secondary" />

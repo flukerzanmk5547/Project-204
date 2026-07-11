@@ -41,7 +41,7 @@ function extractBrands(products: ApiProduct[]) {
 function extractColors(products: ApiProduct[]) {
   const map = new Map<string, { count: number; hex: string }>();
   for (const p of products) {
-    const raw = (p as Record<string, unknown>).colors;
+    const raw = (p as unknown as Record<string, unknown>).colors;
     if (!Array.isArray(raw)) continue;
     for (const c of raw as { name: string; hex?: string }[]) {
       const existing = map.get(c.name);
@@ -200,7 +200,7 @@ export default function CategoryPage({
     }
     if (selectedColors.size > 0) {
       list = list.filter((p) => {
-        const raw = (p as Record<string, unknown>).colors;
+        const raw = (p as unknown as Record<string, unknown>).colors;
         if (!Array.isArray(raw)) return false;
         return (raw as { name: string }[]).some((c) => selectedColors.has(c.name));
       });
@@ -697,7 +697,7 @@ export default function CategoryPage({
                   {filteredProducts.map((product) => {
                     const image = product.images?.[0] ?? "";
                     const productColors = (
-                      (product as Record<string, unknown>).colors as
+                      (product as unknown as Record<string, unknown>).colors as
                         | { name: string; hex?: string }[]
                         | undefined
                     ) ?? [];

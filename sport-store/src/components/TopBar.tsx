@@ -10,16 +10,25 @@ import {
   ChevronDown,
   Menu,
   X,
+  LogOut,
+  Package,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/lib/AuthContext";
 import MobileDrawer from "./MobileDrawer";
 import SearchOverlay from "./SearchOverlay";
 import { getAllConfig } from "@/lib/api";
+import { useCart } from "@/lib/CartContext";
+import { useFavorites } from "@/lib/FavoritesContext";
 
 export default function TopBar() {
+  const { user, isLoggedIn, logout } = useAuth();
+  const { totalItems } = useCart();
+  const { totalItems: favCount } = useFavorites();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchPlaceholder, setSearchPlaceholder] = useState(
     "ค้นหาสินค้า 7,000 รายการจาก 70 ประเภทกีฬา"
@@ -108,20 +117,106 @@ export default function TopBar() {
 
           {/* Right Icons */}
           <div className="flex items-center gap-1">
-            <Link href="/login" className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group">
-              <User size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] mt-0.5 hidden lg:block">เข้าสู่ระบบ</span>
-            </Link>
-            <button className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group">
+            {isLoggedIn ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group"
+                >
+                  <div className="w-5 h-5 rounded-full bg-orange flex items-center justify-center text-[10px] font-bold">
+                    {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                  <span className="text-[10px] mt-0.5 hidden lg:block truncate max-w-[60px]">
+                    {user?.full_name?.split(" ")[0] || "บัญชี"}
+                  </span>
+                </button>
+                {userMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setUserMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-1 bg-white text-navy rounded-lg shadow-xl border border-gray-200 py-2 w-48 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-semibold truncate">
+                          {user?.full_name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user?.email}
+                        </p>
+                      </div>
+                      <Link
+                        href="/account"
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <User size={16} />
+                        บัญชีของฉัน
+                      </Link>
+                      <Link
+                        href="/account/orders"
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <Package size={16} />
+                        คำสั่งซื้อของฉัน
+                      </Link>
+                      <Link
+                        href="/cart"
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <ShoppingCart size={16} />
+                        ตะกร้าของฉัน
+                      </Link>
+                      <Link
+                        href="/favorites"
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <Heart size={16} />
+                        สินค้าโปรด
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setUserMenuOpen(false);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors w-full text-left text-red-600"
+                      >
+                        <LogOut size={16} />
+                        ออกจากระบบ
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group"
+              >
+                <User size={20} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] mt-0.5 hidden lg:block">เข้าสู่ระบบ</span>
+              </Link>
+            )}
+            <Link href="/favorites" className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group relative">
               <Heart size={20} className="group-hover:scale-110 transition-transform" />
               <span className="text-[10px] mt-0.5 hidden lg:block">สินค้าโปรด</span>
-            </button>
+              {favCount > 0 && (
+                <span className="absolute top-0 right-1 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              )}
+            </Link>
             <Link href="/cart" className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group relative">
               <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
               <span className="text-[10px] mt-0.5 hidden lg:block">ตะกร้า</span>
-              <span className="absolute top-0 right-1 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                0
-              </span>
+              {totalItems > 0 && (
+                <span className="absolute top-0 right-1 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
             </Link>
             <button className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group">
               <MapPin size={20} className="group-hover:scale-110 transition-transform" />
@@ -172,14 +267,32 @@ export default function TopBar() {
             >
               <Search size={22} />
             </button>
-            <button className="p-2 hover:bg-white/10 rounded transition-colors" aria-label="บัญชี">
-              <User size={22} />
-            </button>
+            {isLoggedIn ? (
+              <Link
+                href="/account"
+                className="p-2 hover:bg-white/10 rounded transition-colors"
+                aria-label="บัญชี"
+              >
+                <div className="w-[22px] h-[22px] rounded-full bg-orange flex items-center justify-center text-[10px] font-bold">
+                  {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+                </div>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="p-2 hover:bg-white/10 rounded transition-colors"
+                aria-label="เข้าสู่ระบบ"
+              >
+                <User size={22} />
+              </Link>
+            )}
             <Link href="/cart" className="p-2 hover:bg-white/10 rounded transition-colors relative" aria-label="ตะกร้า">
               <ShoppingCart size={22} />
-              <span className="absolute top-0.5 right-0.5 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                0
-              </span>
+              {totalItems > 0 && (
+                <span className="absolute top-0.5 right-0.5 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
             </Link>
           </div>
         </div>

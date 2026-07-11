@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/AuthContext";
+import { CartProvider } from "@/lib/CartContext";
+import { FavoritesProvider } from "@/lib/FavoritesContext";
 
 const notoSansThai = Noto_Sans_Thai({
   subsets: ["thai", "latin"],
@@ -21,7 +24,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className={`${notoSansThai.variable} antialiased`}>{children}</body>
+      <body className={`${notoSansThai.variable} antialiased`}>
+        <AuthProvider>
+          <CartProvider>
+            <FavoritesProvider>{children}</FavoritesProvider>
+          </CartProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

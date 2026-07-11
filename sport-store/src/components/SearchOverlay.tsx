@@ -31,7 +31,7 @@ interface PopularCategory {
 }
 
 function apiToSearchProduct(p: ApiProduct): SearchProduct {
-  const rawColors = (p as Record<string, unknown>).colors;
+  const rawColors = (p as unknown as Record<string, unknown>).colors;
   return {
     id: p.id,
     image: p.images?.[0] ?? "https://picsum.photos/300/300",
