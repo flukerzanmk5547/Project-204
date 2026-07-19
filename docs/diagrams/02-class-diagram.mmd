@@ -19,6 +19,7 @@ classDiagram
     class Customer {
         +browseProducts()
         +manageCart()
+        +manageFavorites()
         +placeOrder()
         +viewOrderHistory()
         +writeReview()
@@ -130,6 +131,23 @@ classDiagram
         +int quantity
         +string size
         +string color
+    }
+
+    class Favorite {
+        +List~FavoriteItem~ items
+        +int totalItems
+        +isFavorite()
+        +addFavorite()
+        +removeFavorite()
+        +toggleFavorite()
+        +clearFavorites()
+    }
+    class FavoriteItem {
+        +uuid product_id
+        +string name
+        +string brand
+        +string image
+        +number price
     }
 
     class Order {
@@ -264,6 +282,8 @@ classDiagram
     Customer "1" --> "*" Order
     Customer "1" --> "1" Cart
     Customer "1" --> "*" Review
+    Customer "1" --> "1" Favorite
+    Favorite "1" --> "*" FavoriteItem
 
     Category "1" --> "*" Category
     Category "1" --> "*" Product
@@ -273,6 +293,7 @@ classDiagram
     Product "1" --> "*" CartItem
     Product "1" --> "*" OrderItem
     Product "1" --> "*" Review
+    Product "1" --> "*" FavoriteItem
     Product "*" --> "*" Promotion
     Product "*" --> "*" ProductBundle
 

@@ -186,6 +186,7 @@ Wireframe / Prototype เปิดดูได้ที่ [`docs/wireframes.htm
 
 > **บทบาทผู้ใช้ในระบบ:** `customer` · `employee` · `admin` (ตาม `profiles.role` ในฐานข้อมูล) และ `super_admin` (อยู่ระหว่างเพิ่มใน schema)
 > ส่วนที่กำกับว่า **planned** คือออกแบบไว้แล้วแต่ยังไม่ได้ implement ฝั่ง backend (orders / addresses / payments / reviews API)
+> **สินค้าโปรด (Favorite)** ทำงานฝั่ง frontend ด้วย localStorage เท่านั้น ยังไม่มี API และตารางในฐานข้อมูล
 
 ### 1. Use Case Diagram
 
@@ -276,6 +277,7 @@ classDiagram
     class Customer {
         +browseProducts()
         +manageCart()
+        +manageFavorites()
         +placeOrder()
         +viewOrderHistory()
         +writeReview()
@@ -387,6 +389,23 @@ classDiagram
         +int quantity
         +string size
         +string color
+    }
+
+    class Favorite {
+        +List~FavoriteItem~ items
+        +int totalItems
+        +isFavorite()
+        +addFavorite()
+        +removeFavorite()
+        +toggleFavorite()
+        +clearFavorites()
+    }
+    class FavoriteItem {
+        +uuid product_id
+        +string name
+        +string brand
+        +string image
+        +number price
     }
 
     class Order {
@@ -521,6 +540,8 @@ classDiagram
     Customer "1" --> "*" Order
     Customer "1" --> "1" Cart
     Customer "1" --> "*" Review
+    Customer "1" --> "1" Favorite
+    Favorite "1" --> "*" FavoriteItem
 
     Category "1" --> "*" Category
     Category "1" --> "*" Product
@@ -530,6 +551,7 @@ classDiagram
     Product "1" --> "*" CartItem
     Product "1" --> "*" OrderItem
     Product "1" --> "*" Review
+    Product "1" --> "*" FavoriteItem
     Product "*" --> "*" Promotion
     Product "*" --> "*" ProductBundle
 
