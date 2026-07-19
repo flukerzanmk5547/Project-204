@@ -1,21 +1,117 @@
 sequenceDiagram
+    autonumber
     actor C as ลูกค้า
-    participant FE as Frontend Next.js
-    participant BE as Backend Fastify
-    participant DB as Database Supabase
-    participant PP as PromptPay
-    C->>FE: เลือกที่อยู่ + วิธีจัดส่ง แล้วกดชำระเงิน
+    actor A as Admin / Employee
+    participant FE as Frontend (Next.js)
+    participant CTX as Context (Auth/Cart/Fav)
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+    participant PP as PromptPay (planned)
+
+    rect rgb(232,240,254)
+    Note over C,DB: 1) เข้าชมหน้าแรก และเรียกดูสินค้า
+    C->>FE: เปิดเว็บ /
+    FE->>BE: GET /api/v1/homepage/sections
+    BE->>DB: query homepage_sections + products
+    DB-->>BE: sections
+    BE-->>FE: JSON
+    FE->>BE: GET /api/v1/banners?type=hero
+    BE-->>FE: banners
+    FE-->>C: แสดง Hero + หมวดหมู่ + ดีลสินค้า
+    end
+
+    rect rgb(232,246,238)
+    Note over C,DB: 2) ค้นหา / ดูรายละเอียดสินค้า
+    C->>FE: พิมพ์คำค้นหา
+    FE->>BE: GET /api/v1/products?search=...
+    BE->>DB: query products
+    DB-->>BE: รายการสินค้า
+    BE-->>FE: ผลการค้นหา
+    C->>FE: คลิกสินค้า
+    FE->>BE: GET /api/v1/products/:id
+    BE-->>FE: รายละเอียดสินค้า
+    FE->>BE: GET /api/v1/recommendations
+    BE-->>FE: สินค้าแนะนำ
+    FE-->>C: แสดงหน้าสินค้า
+    end
+
+    rect rgb(255,244,229)
+    Note over C,SB: 3) สมัครสมาชิก / เข้าสู่ระบบ
+    C->>FE: กรอกอีเมล + รหัสผ่าน
+    FE->>BE: POST /api/v1/auth/register หรือ /login
+    BE->>SB: สร้าง/ตรวจสอบบัญชี
+    SB-->>BE: access_token + refresh_token
+    BE->>DB: บันทึก/อ่าน profiles (role)
+    DB-->>BE: profile
+    BE-->>FE: token + user
+    FE->>CTX: เก็บ token ใน AuthContext
+    FE-->>C: เข้าสู่ระบบสำเร็จ
+    end
+
+    rect rgb(243,238,255)
+    Note over C,DB: 4) จัดการตะกร้าและสินค้าโปรด
+    C->>FE: เลือกไซส์ + กดเพิ่มลงตะกร้า
+    FE->>CTX: CartContext.addItem()
+    FE->>BE: POST /api/v1/cart (แนบ Bearer token)
+    BE->>SB: ตรวจสอบ token
+    SB-->>BE: user
+    BE->>DB: insert cart_items
+    DB-->>BE: ok
+    BE-->>FE: ตะกร้าล่าสุด
+    C->>FE: กดหัวใจ (สินค้าโปรด)
+    FE->>CTX: FavoritesContext.toggle() + localStorage
+    end
+
+    rect rgb(255,235,238)
+    Note over C,PP: 5) สั่งซื้อและชำระเงิน (planned — ยังไม่ implement ฝั่ง backend)
+    C->>FE: เข้าหน้า /checkout เลือกที่อยู่
+    FE->>BE: GET /api/v1/addresses
+    BE-->>FE: รายการที่อยู่
+    C->>FE: เลือกวิธีจัดส่ง + กดชำระเงิน
     FE->>BE: POST /api/v1/orders
-    BE->>DB: บันทึกคำสั่งซื้อ
+    BE->>DB: insert orders + order_items
     DB-->>BE: order_number
-    BE-->>FE: คืนข้อมูลคำสั่งซื้อ
+    BE-->>FE: order
     FE->>BE: POST /api/v1/payments
-    BE->>PP: สร้าง QR PromptPay
-    PP-->>BE: qr_image, payment.id
-    BE-->>FE: คืน qr_image
+    BE->>PP: ขอสร้าง QR PromptPay
+    PP-->>BE: qr_image + payment_id
+    BE-->>FE: qr_image
     C->>PP: สแกน QR แล้วโอนเงิน
     loop ทุก 3 วินาที
         FE->>BE: GET /api/v1/payments/:id/status
+        BE->>DB: อ่านสถานะการชำระเงิน
+        DB-->>BE: status
         BE-->>FE: status
     end
-    FE-->>C: แสดงหน้าสั่งซื้อสำเร็จ + ล้างตะกร้า
+    FE->>CTX: clearCart()
+    FE-->>C: แสดงหน้า "สั่งซื้อสำเร็จ"
+    end
+
+    rect rgb(232,240,254)
+    Note over C,DB: 6) ดูประวัติคำสั่งซื้อ
+    C->>FE: เข้า /account/orders
+    FE->>BE: GET /api/v1/orders/history
+    BE->>DB: query orders by user_id
+    DB-->>BE: รายการคำสั่งซื้อ
+    BE-->>FE: history
+    FE-->>C: แสดงเลขออเดอร์ / สถานะ / ยอดรวม
+    end
+
+    rect rgb(232,246,238)
+    Note over A,DB: 7) ฝั่งผู้ดูแลระบบ — จัดการร้านค้า
+    A->>FE: เข้าหน้าจัดการ (Admin)
+    FE->>BE: GET /api/v1/orders (ทั้งหมด)
+    BE->>SB: ตรวจ token + role
+    SB-->>BE: role = employee / admin
+    BE-->>FE: รายการคำสั่งซื้อ
+    A->>FE: อัปเดตสถานะคำสั่งซื้อ
+    FE->>BE: PUT /api/v1/orders/:id
+    BE->>DB: update orders.status
+    A->>FE: เพิ่ม/แก้ไขสินค้า
+    FE->>BE: POST/PUT /api/v1/products
+    BE->>DB: insert/update products
+    DB-->>BE: ok
+    BE-->>FE: สำเร็จ
+    FE-->>A: แสดงผลการบันทึก
+    end

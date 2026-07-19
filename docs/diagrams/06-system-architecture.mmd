@@ -1,0 +1,40 @@
+flowchart TB
+    subgraph CLIENT["ผู้ใช้งาน (Client)"]
+        BR["Browser / Mobile<br/>Customer · Employee · Admin · Super Admin"]
+    end
+
+    subgraph FE["Frontend — Next.js (App Router) + TypeScript"]
+        PAGES["Pages<br/>/ · /product · /category · /cart<br/>/checkout · /account · /favorites"]
+        COMP["Components<br/>Header · NavMenu · SearchOverlay · CartPanel"]
+        CTX["State (Context + localStorage)<br/>AuthContext · CartContext · FavoritesContext"]
+        APICLI["API Client<br/>lib/api.ts"]
+    end
+
+    subgraph BE["Backend — Fastify + TypeScript"]
+        PLUG["Plugins<br/>CorsPlugin · AuthPlugin · ErrorHandler"]
+        ROUTE["Routes<br/>/api/v1/*"]
+        CTRL["Controller<br/>รับ request + validate ด้วย Zod"]
+        SVC["Service<br/>business logic"]
+        REPO["Repository<br/>query ข้อมูล"]
+    end
+
+    subgraph DATA["Supabase (BaaS)"]
+        AUTH["Supabase Auth<br/>ออก/ตรวจสอบ Bearer Token"]
+        PG[("PostgreSQL<br/>profiles · products · categories<br/>orders · order_items · reviews")]
+    end
+
+    EXT["PromptPay<br/>สร้าง QR / ยืนยันการชำระเงิน<br/>(planned)"]
+
+    BR -->|HTTPS| PAGES
+    PAGES --- COMP
+    PAGES --- CTX
+    PAGES --> APICLI
+    APICLI -->|REST JSON<br/>NEXT_PUBLIC_API_URL| PLUG
+    PLUG --> ROUTE
+    ROUTE --> CTRL
+    CTRL --> SVC
+    SVC --> REPO
+    REPO -->|supabase-js| PG
+    PLUG -.ตรวจ Token.-> AUTH
+    AUTH --- PG
+    SVC -.เรียกชำระเงิน.-> EXT

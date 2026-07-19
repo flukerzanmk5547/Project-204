@@ -181,19 +181,21 @@ http://localhost:3000
 
 ## แผนภาพระบบ (System Diagrams)
 
-ไฟล์ต้นฉบับทั้งหมดอยู่ที่ [`docs/diagrams/`](docs/diagrams) (ไฟล์ `.mmd` + รูป `.png`)
-ส่วน Wireframe / Prototype เปิดดูได้ที่ [`docs/wireframes.html`](docs/wireframes.html) และ [`docs/prototype.html`](docs/prototype.html)
+ไฟล์ต้นฉบับทั้งหมดอยู่ที่ [`docs/diagrams/`](docs/diagrams) (`.mmd` + `.png`)
+Wireframe / Prototype เปิดดูได้ที่ [`docs/wireframes.html`](docs/wireframes.html) และ [`docs/prototype.html`](docs/prototype.html)
+
+> **บทบาทผู้ใช้ในระบบ:** `customer` · `employee` · `admin` (ตาม `profiles.role` ในฐานข้อมูล) และ `super_admin` (อยู่ระหว่างเพิ่มใน schema)
+> ส่วนที่กำกับว่า **planned** คือออกแบบไว้แล้วแต่ยังไม่ได้ implement ฝั่ง backend (orders / addresses / payments / reviews API)
 
 ### 1. Use Case Diagram
-
-ผู้ใช้งานในระบบมี 4 บทบาท: **ลูกค้า (Guest/Member)**, **ผู้ดูแลระบบ (Admin)**, **ผู้ดูแลระบบสูงสุด (Super Admin)** และ **PromptPay** (ระบบชำระเงินภายนอก)
 
 ```mermaid
 flowchart LR
     Guest(["ผู้ใช้ทั่วไป"])
-    Member(["สมาชิก"])
-    Admin(["ผู้ดูแลระบบ"])
-    SAdmin(["ผู้ดูแลระบบสูงสุด"])
+    Member(["สมาชิก (Customer)"])
+    Emp(["พนักงาน (Employee)"])
+    Admin(["ผู้ดูแลระบบ (Admin)"])
+    SAdmin(["ผู้ดูแลระบบสูงสุด (Super Admin)"])
     PP(["PromptPay"])
 
     subgraph SYS["ระบบ Sport Store"]
@@ -207,12 +209,17 @@ flowchart LR
         UC8["ทำรายการสั่งซื้อ (Checkout)"]
         UC9["ชำระเงิน PromptPay"]
         UC10["ดูประวัติคำสั่งซื้อ"]
-        UC11["จัดการสินค้า / หมวดหมู่"]
-        UC12["จัดการคำสั่งซื้อ / แบนเนอร์"]
-        UC13["ดูรายงานยอดขาย"]
-        UC14["จัดการบัญชีผู้ดูแลระบบ"]
-        UC15["กำหนดสิทธิ์การเข้าถึง"]
-        UC16["ตั้งค่าระบบ"]
+        UC11["เขียนรีวิวสินค้า"]
+        UC12["ตรวจสอบคำสั่งซื้อ"]
+        UC13["อัปเดตสถานะคำสั่งซื้อ"]
+        UC14["จัดการสต็อกสินค้า"]
+        UC15["จัดการสินค้า / หมวดหมู่"]
+        UC16["จัดการแบนเนอร์ / โปรโมชัน"]
+        UC17["จัดการหน้าแรก / ชุดสินค้า"]
+        UC18["ดูรายงานยอดขาย"]
+        UC19["จัดการบัญชีผู้ดูแลระบบ"]
+        UC20["กำหนดสิทธิ์การเข้าถึง"]
+        UC21["ตั้งค่าระบบ"]
     end
 
     Guest --- UC1
@@ -224,16 +231,24 @@ flowchart LR
     Member --- UC7
     Member --- UC8
     Member --- UC10
+    Member --- UC11
     UC8 -. include .-> UC7
     UC8 -. include .-> UC9
     UC9 -. include .-> UC10
     UC9 --- PP
-    Admin --- UC11
-    Admin --- UC12
-    Admin --- UC13
-    SAdmin --- UC14
-    SAdmin --- UC15
-    SAdmin --- UC16
+
+    Emp --- UC12
+    Emp --- UC13
+    Emp --- UC14
+    Admin --- UC15
+    Admin --- UC16
+    Admin --- UC17
+    Admin --- UC18
+    SAdmin --- UC19
+    SAdmin --- UC20
+    SAdmin --- UC21
+
+    Admin -. สืบทอดสิทธิ์ .-> Emp
     SAdmin -. สืบทอดสิทธิ์ .-> Admin
 ```
 
@@ -241,29 +256,42 @@ flowchart LR
 
 ```mermaid
 classDiagram
+    direction TB
+
     class User {
-        +string id
+        +uuid id
         +string email
         +string full_name
         +string phone
+        +string avatar_url
         +string role
         +register()
         +login()
         +logout()
         +getProfile()
         +updateProfile()
+        +requestPasswordReset()
+        +refreshToken()
     }
     class Customer {
+        +browseProducts()
+        +manageCart()
         +placeOrder()
         +viewOrderHistory()
-        +manageFavorites()
-        +manageAddress()
+        +writeReview()
+    }
+    class Employee {
+        +viewOrders()
+        +updateOrderStatus()
+        +adjustStock()
     }
     class Admin {
         +manageProduct()
         +manageCategory()
-        +manageOrder()
         +manageBanner()
+        +managePromotion()
+        +manageBundle()
+        +manageHomepage()
         +viewSalesReport()
     }
     class SuperAdmin {
@@ -271,98 +299,553 @@ classDiagram
         +assignPermission()
         +configureSystem()
     }
-    class Product {
-        +string id
-        +string name
-        +number price
-        +string brand
-        +getById()
-        +search()
-    }
+
     class Category {
-        +string id
+        +uuid id
         +string name
-        +string parent_id
-        +getTree()
+        +string slug
+        +string route_path
+        +uuid parent_id
+        +int level
+        +bool is_active
+        +getCategoryTree()
+        +getRootCategories()
+        +getChildren()
+        +getByRoutePath()
+        +createCategory()
+        +updateCategory()
+        +deleteCategory()
     }
+    class Product {
+        +uuid id
+        +string name
+        +string slug
+        +string sku
+        +number price
+        +number original_price
+        +string brand
+        +uuid category_id
+        +json images
+        +int stock
+        +bool is_featured
+        +getAllProducts()
+        +getProductById()
+        +getRelatedProducts()
+        +getProductsByCategory()
+        +createProduct()
+        +updateProduct()
+        +deleteProduct()
+        +adjustStock()
+    }
+    class ProductVariant {
+        +uuid id
+        +uuid product_id
+        +string sku
+        +number price_override
+        +int stock
+        +getVariantsByProduct()
+        +createVariant()
+        +updateVariant()
+        +deleteVariant()
+    }
+    class AttributeGroup {
+        +uuid id
+        +string name
+        +getAllGroups()
+        +getGroupById()
+        +createGroup()
+        +updateGroup()
+        +deleteGroup()
+        +getCategoryAttributes()
+        +linkCategoryAttribute()
+        +unlinkCategoryAttribute()
+    }
+    class AttributeOption {
+        +uuid id
+        +uuid group_id
+        +string value
+        +getOptionsByGroup()
+        +createOption()
+        +updateOption()
+        +deleteOption()
+    }
+
     class Cart {
+        +uuid user_id
         +int totalItems
         +number totalPrice
+        +getCart()
         +addItem()
+        +updateItem()
         +removeItem()
         +clearCart()
+        +getItemCount()
     }
+    class CartItem {
+        +uuid id
+        +uuid product_id
+        +int quantity
+        +string size
+        +string color
+    }
+
     class Order {
-        +string id
-        +string order_number
+        +uuid id
+        +uuid user_id
         +string status
         +number total
-        +create()
-        +getHistory()
+        +createOrder()
+        +getOrderHistory()
+        +getOrderDetail()
         +updateStatus()
+        +calculateTotal()
     }
     class OrderItem {
-        +string id
+        +uuid id
+        +uuid order_id
+        +uuid product_id
+        +uuid variant_id
         +int quantity
         +number price
+        +getSubtotal()
     }
     class Payment {
-        +string id
+        +uuid id
+        +uuid order_id
         +string method
+        +number amount
+        +number ref_amount
         +string status
         +createPayment()
         +generateQR()
         +checkStatus()
+        +confirm()
     }
     class Address {
-        +string id
+        +uuid id
+        +uuid user_id
         +string province
+        +string amphoe
         +string postal_code
         +bool is_default
-        +create()
+        +getAddresses()
+        +createAddress()
+        +updateAddress()
+        +deleteAddress()
         +setDefault()
+    }
+    class Review {
+        +uuid id
+        +uuid user_id
+        +uuid product_id
+        +int rating
+        +string title
+        +string comment
+        +bool is_verified
+        +getReviewsByProduct()
+        +createReview()
+        +updateReview()
+        +deleteReview()
+    }
+
+    class Banner {
+        +uuid id
+        +string type
+        +string title
+        +string image
+        +int sort_order
+        +getBanners()
+        +createBanner()
+        +updateBanner()
+        +deleteBanner()
+    }
+    class Promotion {
+        +uuid id
+        +string name
+        +string type
+        +number value
+        +datetime start_at
+        +datetime end_at
+        +getAll()
+        +getBySlug()
+        +getActiveDeals()
+        +getPromotionProducts()
+        +create()
+        +update()
+        +delete()
+        +addProduct()
+        +removeProduct()
+    }
+    class ProductBundle {
+        +uuid id
+        +string name
+        +number bundle_price
+        +getAll()
+        +getActiveBundles()
+        +getBundlesForProduct()
+        +create()
+        +update()
+        +remove()
+        +addItem()
+        +removeItem()
+        +linkToProduct()
+        +unlinkFromProduct()
+    }
+    class HomepageSection {
+        +uuid id
+        +string title
+        +string type
+        +uuid category_id
+        +int sort_order
+        +getSections()
+        +getCategoryShortcuts()
+        +getConfig()
+        +createSection()
+        +updateSection()
+        +deleteSection()
+        +addProductToSection()
+        +removeProductFromSection()
+    }
+    class Recommendation {
+        +trackView()
+        +getRecommendations()
+        +getTrending()
     }
 
     User <|-- Customer
-    User <|-- Admin
+    User <|-- Employee
+    Employee <|-- Admin
     Admin <|-- SuperAdmin
+
     Customer "1" --> "*" Address
     Customer "1" --> "*" Order
-    Cart "1" --> "*" OrderItem
-    Order "1" --> "*" OrderItem
-    Product "1" --> "*" OrderItem
-    Order "1" --> "1" Payment
-    Product "*" --> "1" Category
+    Customer "1" --> "1" Cart
+    Customer "1" --> "*" Review
+
     Category "1" --> "*" Category
+    Category "1" --> "*" Product
+    Category "*" --> "*" AttributeGroup
+
+    Product "1" --> "*" ProductVariant
+    Product "1" --> "*" CartItem
+    Product "1" --> "*" OrderItem
+    Product "1" --> "*" Review
+    Product "*" --> "*" Promotion
+    Product "*" --> "*" ProductBundle
+
+    AttributeGroup "1" --> "*" AttributeOption
+    ProductVariant "1" --> "*" OrderItem
+
+    Cart "1" --> "*" CartItem
+    Order "1" --> "*" OrderItem
+    Order "1" --> "1" Payment
+
+    HomepageSection "1" --> "*" Product
+    Recommendation ..> Product : แนะนำ
 ```
 
-### 3. Sequence Diagram — สั่งซื้อและชำระเงิน (PromptPay)
+### 3. Sequence Diagram (ภาพรวมทั้งระบบ)
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor C as ลูกค้า
-    participant FE as Frontend Next.js
-    participant BE as Backend Fastify
-    participant DB as Database Supabase
-    participant PP as PromptPay
-    C->>FE: เลือกที่อยู่ + วิธีจัดส่ง แล้วกดชำระเงิน
+    actor A as Admin / Employee
+    participant FE as Frontend (Next.js)
+    participant CTX as Context (Auth/Cart/Fav)
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+    participant PP as PromptPay (planned)
+
+    rect rgb(232,240,254)
+    Note over C,DB: 1) เข้าชมหน้าแรก และเรียกดูสินค้า
+    C->>FE: เปิดเว็บ /
+    FE->>BE: GET /api/v1/homepage/sections
+    BE->>DB: query homepage_sections + products
+    DB-->>BE: sections
+    BE-->>FE: JSON
+    FE->>BE: GET /api/v1/banners?type=hero
+    BE-->>FE: banners
+    FE-->>C: แสดง Hero + หมวดหมู่ + ดีลสินค้า
+    end
+
+    rect rgb(232,246,238)
+    Note over C,DB: 2) ค้นหา / ดูรายละเอียดสินค้า
+    C->>FE: พิมพ์คำค้นหา
+    FE->>BE: GET /api/v1/products?search=...
+    BE->>DB: query products
+    DB-->>BE: รายการสินค้า
+    BE-->>FE: ผลการค้นหา
+    C->>FE: คลิกสินค้า
+    FE->>BE: GET /api/v1/products/:id
+    BE-->>FE: รายละเอียดสินค้า
+    FE->>BE: GET /api/v1/recommendations
+    BE-->>FE: สินค้าแนะนำ
+    FE-->>C: แสดงหน้าสินค้า
+    end
+
+    rect rgb(255,244,229)
+    Note over C,SB: 3) สมัครสมาชิก / เข้าสู่ระบบ
+    C->>FE: กรอกอีเมล + รหัสผ่าน
+    FE->>BE: POST /api/v1/auth/register หรือ /login
+    BE->>SB: สร้าง/ตรวจสอบบัญชี
+    SB-->>BE: access_token + refresh_token
+    BE->>DB: บันทึก/อ่าน profiles (role)
+    DB-->>BE: profile
+    BE-->>FE: token + user
+    FE->>CTX: เก็บ token ใน AuthContext
+    FE-->>C: เข้าสู่ระบบสำเร็จ
+    end
+
+    rect rgb(243,238,255)
+    Note over C,DB: 4) จัดการตะกร้าและสินค้าโปรด
+    C->>FE: เลือกไซส์ + กดเพิ่มลงตะกร้า
+    FE->>CTX: CartContext.addItem()
+    FE->>BE: POST /api/v1/cart (แนบ Bearer token)
+    BE->>SB: ตรวจสอบ token
+    SB-->>BE: user
+    BE->>DB: insert cart_items
+    DB-->>BE: ok
+    BE-->>FE: ตะกร้าล่าสุด
+    C->>FE: กดหัวใจ (สินค้าโปรด)
+    FE->>CTX: FavoritesContext.toggle() + localStorage
+    end
+
+    rect rgb(255,235,238)
+    Note over C,PP: 5) สั่งซื้อและชำระเงิน (planned — ยังไม่ implement ฝั่ง backend)
+    C->>FE: เข้าหน้า /checkout เลือกที่อยู่
+    FE->>BE: GET /api/v1/addresses
+    BE-->>FE: รายการที่อยู่
+    C->>FE: เลือกวิธีจัดส่ง + กดชำระเงิน
     FE->>BE: POST /api/v1/orders
-    BE->>DB: บันทึกคำสั่งซื้อ
+    BE->>DB: insert orders + order_items
     DB-->>BE: order_number
-    BE-->>FE: คืนข้อมูลคำสั่งซื้อ
+    BE-->>FE: order
     FE->>BE: POST /api/v1/payments
-    BE->>PP: สร้าง QR PromptPay
-    PP-->>BE: qr_image, payment.id
-    BE-->>FE: คืน qr_image
+    BE->>PP: ขอสร้าง QR PromptPay
+    PP-->>BE: qr_image + payment_id
+    BE-->>FE: qr_image
     C->>PP: สแกน QR แล้วโอนเงิน
     loop ทุก 3 วินาที
         FE->>BE: GET /api/v1/payments/:id/status
+        BE->>DB: อ่านสถานะการชำระเงิน
+        DB-->>BE: status
         BE-->>FE: status
     end
-    FE-->>C: แสดงหน้าสั่งซื้อสำเร็จ + ล้างตะกร้า
+    FE->>CTX: clearCart()
+    FE-->>C: แสดงหน้า "สั่งซื้อสำเร็จ"
+    end
+
+    rect rgb(232,240,254)
+    Note over C,DB: 6) ดูประวัติคำสั่งซื้อ
+    C->>FE: เข้า /account/orders
+    FE->>BE: GET /api/v1/orders/history
+    BE->>DB: query orders by user_id
+    DB-->>BE: รายการคำสั่งซื้อ
+    BE-->>FE: history
+    FE-->>C: แสดงเลขออเดอร์ / สถานะ / ยอดรวม
+    end
+
+    rect rgb(232,246,238)
+    Note over A,DB: 7) ฝั่งผู้ดูแลระบบ — จัดการร้านค้า
+    A->>FE: เข้าหน้าจัดการ (Admin)
+    FE->>BE: GET /api/v1/orders (ทั้งหมด)
+    BE->>SB: ตรวจ token + role
+    SB-->>BE: role = employee / admin
+    BE-->>FE: รายการคำสั่งซื้อ
+    A->>FE: อัปเดตสถานะคำสั่งซื้อ
+    FE->>BE: PUT /api/v1/orders/:id
+    BE->>DB: update orders.status
+    A->>FE: เพิ่ม/แก้ไขสินค้า
+    FE->>BE: POST/PUT /api/v1/products
+    BE->>DB: insert/update products
+    DB-->>BE: ok
+    BE-->>FE: สำเร็จ
+    FE-->>A: แสดงผลการบันทึก
+    end
 ```
 
-### 4. Deployment Diagram
+### 4. ER Diagram (Database Design)
+
+```mermaid
+erDiagram
+    PROFILES ||--o{ CART_ITEMS : "มีสินค้าในตะกร้า"
+    PROFILES ||--o{ ORDERS : "สั่งซื้อ"
+    PROFILES ||--o{ REVIEWS : "เขียนรีวิว"
+    PROFILES ||--o{ ADDRESSES : "มีที่อยู่ (planned)"
+
+    CATEGORIES ||--o{ CATEGORIES : "หมวดหมู่ย่อย"
+    CATEGORIES ||--o{ PRODUCTS : "มีสินค้า"
+
+    PRODUCTS ||--o{ PRODUCT_VARIANTS : "มีตัวเลือก"
+    PRODUCTS ||--o{ CART_ITEMS : "ถูกใส่ตะกร้า"
+    PRODUCTS ||--o{ ORDER_ITEMS : "ถูกสั่งซื้อ"
+    PRODUCTS ||--o{ REVIEWS : "ถูกรีวิว"
+    PRODUCTS ||--o{ PROMOTION_PRODUCTS : "อยู่ในโปรโมชัน"
+
+    ORDERS ||--o{ ORDER_ITEMS : "ประกอบด้วย"
+    ORDERS ||--|| PAYMENTS : "ชำระเงิน (planned)"
+    PRODUCT_VARIANTS ||--o{ ORDER_ITEMS : "ระบุตัวเลือก"
+    PROMOTIONS ||--o{ PROMOTION_PRODUCTS : "ครอบคลุมสินค้า"
+
+    PROFILES {
+        uuid id PK "FK auth.users"
+        text email
+        text full_name
+        text phone
+        text avatar_url
+        text role "customer | employee | admin (+super_admin planned)"
+        timestamptz created_at
+    }
+    CATEGORIES {
+        uuid id PK
+        text name
+        text slug UK
+        text route_path UK
+        uuid parent_id FK "หมวดหมู่แม่"
+        int level
+        int sort_order
+        bool is_active
+    }
+    PRODUCTS {
+        uuid id PK
+        text name
+        text slug UK
+        text sku UK
+        numeric price
+        numeric original_price
+        text brand
+        uuid category_id FK
+        jsonb images
+        jsonb tags
+        int stock
+        bool is_active
+        bool is_featured
+    }
+    PRODUCT_VARIANTS {
+        uuid id PK
+        uuid product_id FK
+        text sku UK
+        numeric price_override
+        int stock
+        bool is_active
+    }
+    CART_ITEMS {
+        uuid id PK
+        uuid user_id FK
+        uuid product_id FK
+        int quantity
+        text size
+        text color
+    }
+    ORDERS {
+        uuid id PK
+        uuid user_id FK
+        text status "pending|paid|shipped|delivered|cancelled"
+        numeric total
+        timestamptz created_at
+    }
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        uuid variant_id FK
+        int quantity
+        numeric price
+    }
+    REVIEWS {
+        uuid id PK
+        uuid user_id FK
+        uuid product_id FK
+        int rating "1-5"
+        text title
+        text comment
+        bool is_verified
+    }
+    PROMOTIONS {
+        uuid id PK
+        text name
+        text type
+        numeric value
+        timestamptz start_at
+        timestamptz end_at
+    }
+    PROMOTION_PRODUCTS {
+        uuid id PK
+        uuid promotion_id FK
+        uuid product_id FK
+    }
+    ADDRESSES {
+        uuid id PK "PLANNED - ยังไม่ได้สร้างตาราง"
+        uuid user_id FK
+        text full_name
+        text phone
+        text province
+        text amphoe
+        text district
+        text postal_code
+        text address
+        bool is_default
+    }
+    PAYMENTS {
+        uuid id PK "PLANNED - ยังไม่ได้สร้างตาราง"
+        uuid order_id FK
+        text method "promptpay|credit|bank"
+        numeric amount
+        numeric ref_amount
+        text status "pending|confirmed|expired"
+        text promptpay_number
+        timestamptz expires_at
+    }
+```
+
+### 5. System Architecture
+
+```mermaid
+flowchart TB
+    subgraph CLIENT["ผู้ใช้งาน (Client)"]
+        BR["Browser / Mobile<br/>Customer · Employee · Admin · Super Admin"]
+    end
+
+    subgraph FE["Frontend — Next.js (App Router) + TypeScript"]
+        PAGES["Pages<br/>/ · /product · /category · /cart<br/>/checkout · /account · /favorites"]
+        COMP["Components<br/>Header · NavMenu · SearchOverlay · CartPanel"]
+        CTX["State (Context + localStorage)<br/>AuthContext · CartContext · FavoritesContext"]
+        APICLI["API Client<br/>lib/api.ts"]
+    end
+
+    subgraph BE["Backend — Fastify + TypeScript"]
+        PLUG["Plugins<br/>CorsPlugin · AuthPlugin · ErrorHandler"]
+        ROUTE["Routes<br/>/api/v1/*"]
+        CTRL["Controller<br/>รับ request + validate ด้วย Zod"]
+        SVC["Service<br/>business logic"]
+        REPO["Repository<br/>query ข้อมูล"]
+    end
+
+    subgraph DATA["Supabase (BaaS)"]
+        AUTH["Supabase Auth<br/>ออก/ตรวจสอบ Bearer Token"]
+        PG[("PostgreSQL<br/>profiles · products · categories<br/>orders · order_items · reviews")]
+    end
+
+    EXT["PromptPay<br/>สร้าง QR / ยืนยันการชำระเงิน<br/>(planned)"]
+
+    BR -->|HTTPS| PAGES
+    PAGES --- COMP
+    PAGES --- CTX
+    PAGES --> APICLI
+    APICLI -->|REST JSON<br/>NEXT_PUBLIC_API_URL| PLUG
+    PLUG --> ROUTE
+    ROUTE --> CTRL
+    CTRL --> SVC
+    SVC --> REPO
+    REPO -->|supabase-js| PG
+    PLUG -.ตรวจ Token.-> AUTH
+    AUTH --- PG
+    SVC -.เรียกชำระเงิน.-> EXT
+```
+
+### 6. Deployment Diagram
 
 ```mermaid
 flowchart TB

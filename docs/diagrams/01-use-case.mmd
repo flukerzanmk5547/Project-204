@@ -1,8 +1,9 @@
 flowchart LR
     Guest(["ผู้ใช้ทั่วไป"])
-    Member(["สมาชิก"])
-    Admin(["ผู้ดูแลระบบ"])
-    SAdmin(["ผู้ดูแลระบบสูงสุด"])
+    Member(["สมาชิก (Customer)"])
+    Emp(["พนักงาน (Employee)"])
+    Admin(["ผู้ดูแลระบบ (Admin)"])
+    SAdmin(["ผู้ดูแลระบบสูงสุด (Super Admin)"])
     PP(["PromptPay"])
 
     subgraph SYS["ระบบ Sport Store"]
@@ -16,12 +17,17 @@ flowchart LR
         UC8["ทำรายการสั่งซื้อ (Checkout)"]
         UC9["ชำระเงิน PromptPay"]
         UC10["ดูประวัติคำสั่งซื้อ"]
-        UC11["จัดการสินค้า / หมวดหมู่"]
-        UC12["จัดการคำสั่งซื้อ / แบนเนอร์"]
-        UC13["ดูรายงานยอดขาย"]
-        UC14["จัดการบัญชีผู้ดูแลระบบ"]
-        UC15["กำหนดสิทธิ์การเข้าถึง"]
-        UC16["ตั้งค่าระบบ"]
+        UC11["เขียนรีวิวสินค้า"]
+        UC12["ตรวจสอบคำสั่งซื้อ"]
+        UC13["อัปเดตสถานะคำสั่งซื้อ"]
+        UC14["จัดการสต็อกสินค้า"]
+        UC15["จัดการสินค้า / หมวดหมู่"]
+        UC16["จัดการแบนเนอร์ / โปรโมชัน"]
+        UC17["จัดการหน้าแรก / ชุดสินค้า"]
+        UC18["ดูรายงานยอดขาย"]
+        UC19["จัดการบัญชีผู้ดูแลระบบ"]
+        UC20["กำหนดสิทธิ์การเข้าถึง"]
+        UC21["ตั้งค่าระบบ"]
     end
 
     Guest --- UC1
@@ -33,14 +39,22 @@ flowchart LR
     Member --- UC7
     Member --- UC8
     Member --- UC10
+    Member --- UC11
     UC8 -. include .-> UC7
     UC8 -. include .-> UC9
     UC9 -. include .-> UC10
     UC9 --- PP
-    Admin --- UC11
-    Admin --- UC12
-    Admin --- UC13
-    SAdmin --- UC14
-    SAdmin --- UC15
-    SAdmin --- UC16
+
+    Emp --- UC12
+    Emp --- UC13
+    Emp --- UC14
+    Admin --- UC15
+    Admin --- UC16
+    Admin --- UC17
+    Admin --- UC18
+    SAdmin --- UC19
+    SAdmin --- UC20
+    SAdmin --- UC21
+
+    Admin -. สืบทอดสิทธิ์ .-> Emp
     SAdmin -. สืบทอดสิทธิ์ .-> Admin

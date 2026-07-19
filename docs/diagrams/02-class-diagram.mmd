@@ -1,6 +1,8 @@
 classDiagram
+    direction TB
+
     class User {
-        +string id
+        +uuid id
         +string email
         +string full_name
         +string phone
@@ -11,158 +13,275 @@ classDiagram
         +logout()
         +getProfile()
         +updateProfile()
+        +requestPasswordReset()
         +refreshToken()
     }
     class Customer {
+        +browseProducts()
+        +manageCart()
         +placeOrder()
         +viewOrderHistory()
-        +manageFavorites()
-        +manageAddress()
+        +writeReview()
+    }
+    class Employee {
+        +viewOrders()
+        +updateOrderStatus()
+        +adjustStock()
     }
     class Admin {
         +manageProduct()
         +manageCategory()
-        +manageOrder()
         +manageBanner()
+        +managePromotion()
+        +manageBundle()
+        +manageHomepage()
         +viewSalesReport()
     }
     class SuperAdmin {
         +manageAdminAccount()
         +assignPermission()
         +configureSystem()
-        +viewAllReports()
     }
 
-    User <|-- Customer
-    User <|-- Admin
-    Admin <|-- SuperAdmin
-    class Address {
-        +string id
-        +string user_id
-        +string full_name
-        +string phone
-        +string postal_code
-        +string province
-        +string amphoe
-        +string district
-        +string address
-        +bool is_default
-        +getAll()
-        +create()
-        +update()
-        +delete()
-        +setDefault()
-    }
-    class Product {
-        +string id
-        +string name
-        +string slug
-        +number price
-        +number original_price
-        +string brand
-        +List~string~ images
-        +List~string~ tags
-        +number rating
-        +int review_count
-        +bool is_new
-        +getById()
-        +search()
-        +getByCategory()
-        +getPopular()
-    }
     class Category {
-        +string id
+        +uuid id
         +string name
         +string slug
         +string route_path
-        +string parent_id
+        +uuid parent_id
         +int level
-        +int sort_order
-        +getTree()
-        +getByRoute()
+        +bool is_active
+        +getCategoryTree()
+        +getRootCategories()
         +getChildren()
+        +getByRoutePath()
+        +createCategory()
+        +updateCategory()
+        +deleteCategory()
     }
+    class Product {
+        +uuid id
+        +string name
+        +string slug
+        +string sku
+        +number price
+        +number original_price
+        +string brand
+        +uuid category_id
+        +json images
+        +int stock
+        +bool is_featured
+        +getAllProducts()
+        +getProductById()
+        +getRelatedProducts()
+        +getProductsByCategory()
+        +createProduct()
+        +updateProduct()
+        +deleteProduct()
+        +adjustStock()
+    }
+    class ProductVariant {
+        +uuid id
+        +uuid product_id
+        +string sku
+        +number price_override
+        +int stock
+        +getVariantsByProduct()
+        +createVariant()
+        +updateVariant()
+        +deleteVariant()
+    }
+    class AttributeGroup {
+        +uuid id
+        +string name
+        +getAllGroups()
+        +getGroupById()
+        +createGroup()
+        +updateGroup()
+        +deleteGroup()
+        +getCategoryAttributes()
+        +linkCategoryAttribute()
+        +unlinkCategoryAttribute()
+    }
+    class AttributeOption {
+        +uuid id
+        +uuid group_id
+        +string value
+        +getOptionsByGroup()
+        +createOption()
+        +updateOption()
+        +deleteOption()
+    }
+
     class Cart {
-        +List~CartItem~ items
+        +uuid user_id
         +int totalItems
         +number totalPrice
+        +getCart()
         +addItem()
+        +updateItem()
         +removeItem()
-        +updateQuantity()
         +clearCart()
-        +getTotalPrice()
+        +getItemCount()
     }
     class CartItem {
-        +string id
-        +string product_id
-        +string name
-        +string brand
-        +string image
-        +number price
-        +string size
+        +uuid id
+        +uuid product_id
         +int quantity
+        +string size
+        +string color
     }
-    class Favorite {
-        +List~FavoriteItem~ items
-        +int totalItems
-        +addFavorite()
-        +removeFavorite()
-        +toggleFavorite()
-        +isFavorite()
-        +clearFavorites()
-    }
+
     class Order {
-        +string id
-        +string order_number
+        +uuid id
+        +uuid user_id
         +string status
-        +string shipping_name
-        +string shipping_phone
-        +string shipping_address
-        +string payment_method
-        +number subtotal
-        +number discount_total
-        +number shipping_cost
         +number total
-        +datetime created_at
-        +create()
-        +getHistory()
-        +getDetail()
-        +calculateTotal()
+        +createOrder()
+        +getOrderHistory()
+        +getOrderDetail()
         +updateStatus()
+        +calculateTotal()
     }
     class OrderItem {
-        +string id
-        +string order_id
-        +string product_id
-        +string name
-        +string brand
-        +string size
-        +number price
+        +uuid id
+        +uuid order_id
+        +uuid product_id
+        +uuid variant_id
         +int quantity
+        +number price
         +getSubtotal()
     }
     class Payment {
-        +string id
-        +string order_id
+        +uuid id
+        +uuid order_id
         +string method
         +number amount
         +number ref_amount
         +string status
-        +string promptpay_number
-        +datetime expires_at
-        +datetime confirmed_at
         +createPayment()
         +generateQR()
         +checkStatus()
         +confirm()
     }
+    class Address {
+        +uuid id
+        +uuid user_id
+        +string province
+        +string amphoe
+        +string postal_code
+        +bool is_default
+        +getAddresses()
+        +createAddress()
+        +updateAddress()
+        +deleteAddress()
+        +setDefault()
+    }
+    class Review {
+        +uuid id
+        +uuid user_id
+        +uuid product_id
+        +int rating
+        +string title
+        +string comment
+        +bool is_verified
+        +getReviewsByProduct()
+        +createReview()
+        +updateReview()
+        +deleteReview()
+    }
 
-    User "1" --> "*" Address
-    User "1" --> "*" Order
-    User "1" --> "*" Favorite
+    class Banner {
+        +uuid id
+        +string type
+        +string title
+        +string image
+        +int sort_order
+        +getBanners()
+        +createBanner()
+        +updateBanner()
+        +deleteBanner()
+    }
+    class Promotion {
+        +uuid id
+        +string name
+        +string type
+        +number value
+        +datetime start_at
+        +datetime end_at
+        +getAll()
+        +getBySlug()
+        +getActiveDeals()
+        +getPromotionProducts()
+        +create()
+        +update()
+        +delete()
+        +addProduct()
+        +removeProduct()
+    }
+    class ProductBundle {
+        +uuid id
+        +string name
+        +number bundle_price
+        +getAll()
+        +getActiveBundles()
+        +getBundlesForProduct()
+        +create()
+        +update()
+        +remove()
+        +addItem()
+        +removeItem()
+        +linkToProduct()
+        +unlinkFromProduct()
+    }
+    class HomepageSection {
+        +uuid id
+        +string title
+        +string type
+        +uuid category_id
+        +int sort_order
+        +getSections()
+        +getCategoryShortcuts()
+        +getConfig()
+        +createSection()
+        +updateSection()
+        +deleteSection()
+        +addProductToSection()
+        +removeProductFromSection()
+    }
+    class Recommendation {
+        +trackView()
+        +getRecommendations()
+        +getTrending()
+    }
+
+    User <|-- Customer
+    User <|-- Employee
+    Employee <|-- Admin
+    Admin <|-- SuperAdmin
+
+    Customer "1" --> "*" Address
+    Customer "1" --> "*" Order
+    Customer "1" --> "1" Cart
+    Customer "1" --> "*" Review
+
+    Category "1" --> "*" Category
+    Category "1" --> "*" Product
+    Category "*" --> "*" AttributeGroup
+
+    Product "1" --> "*" ProductVariant
+    Product "1" --> "*" CartItem
+    Product "1" --> "*" OrderItem
+    Product "1" --> "*" Review
+    Product "*" --> "*" Promotion
+    Product "*" --> "*" ProductBundle
+
+    AttributeGroup "1" --> "*" AttributeOption
+    ProductVariant "1" --> "*" OrderItem
+
     Cart "1" --> "*" CartItem
     Order "1" --> "*" OrderItem
-    Product "1" --> "*" OrderItem
     Order "1" --> "1" Payment
-    Category "1" --> "*" Category
-    Product "*" --> "1" Category
+
+    HomepageSection "1" --> "*" Product
+    Recommendation ..> Product : แนะนำ
