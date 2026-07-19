@@ -187,6 +187,7 @@ Wireframe / Prototype เปิดดูได้ที่ [`docs/wireframes.htm
 > **บทบาทผู้ใช้ในระบบ:** `customer` · `employee` · `admin` (ตาม `profiles.role` ในฐานข้อมูล) และ `super_admin` (อยู่ระหว่างเพิ่มใน schema)
 > ส่วนที่กำกับว่า **planned** คือออกแบบไว้แล้วแต่ยังไม่ได้ implement ฝั่ง backend (orders / addresses / payments / reviews API)
 > **สินค้าโปรด (Favorite)** ทำงานฝั่ง frontend ด้วย localStorage เท่านั้น ยังไม่มี API และตารางในฐานข้อมูล
+> **แบบประเมินความพึงพอใจ (Feedback)** เป็น UI อย่างเดียว ยังไม่ส่งข้อมูลไป backend และไม่บันทึกลงฐานข้อมูล
 
 ### 1. Use Case Diagram
 
@@ -221,12 +222,14 @@ flowchart LR
         UC19["จัดการบัญชีผู้ดูแลระบบ"]
         UC20["กำหนดสิทธิ์การเข้าถึง"]
         UC21["ตั้งค่าระบบ"]
+        UC22["ให้คะแนนความพึงพอใจ (Feedback)"]
     end
 
     Guest --- UC1
     Guest --- UC2
     Guest --- UC3
     Guest --- UC4
+    Guest --- UC22
     Member --- UC5
     Member --- UC6
     Member --- UC7
@@ -530,6 +533,37 @@ classDiagram
         +getRecommendations()
         +getTrending()
     }
+    class ProductView {
+        +uuid id
+        +uuid user_id
+        +uuid product_id
+        +datetime viewed_at
+    }
+    class CategoryShortcut {
+        +uuid id
+        +string label
+        +string image
+        +string link
+        +int sort_order
+        +getAllShortcuts()
+        +createShortcut()
+        +updateShortcut()
+        +deleteShortcut()
+    }
+    class SiteConfig {
+        +string key
+        +string value
+        +getConfig()
+        +getAllConfig()
+        +updateConfig()
+        +deleteConfig()
+    }
+    class Feedback {
+        +int rating
+        +string purpose
+        +bool achieved
+        +submitFeedback()
+    }
 
     User <|-- Customer
     User <|-- Employee
@@ -564,6 +598,9 @@ classDiagram
 
     HomepageSection "1" --> "*" Product
     Recommendation ..> Product : แนะนำ
+    Recommendation "1" --> "*" ProductView
+    Product "1" --> "*" ProductView
+    Customer ..> Feedback : ส่งแบบประเมิน
 ```
 
 ### 3. Sequence Diagram

@@ -272,6 +272,37 @@ classDiagram
         +getRecommendations()
         +getTrending()
     }
+    class ProductView {
+        +uuid id
+        +uuid user_id
+        +uuid product_id
+        +datetime viewed_at
+    }
+    class CategoryShortcut {
+        +uuid id
+        +string label
+        +string image
+        +string link
+        +int sort_order
+        +getAllShortcuts()
+        +createShortcut()
+        +updateShortcut()
+        +deleteShortcut()
+    }
+    class SiteConfig {
+        +string key
+        +string value
+        +getConfig()
+        +getAllConfig()
+        +updateConfig()
+        +deleteConfig()
+    }
+    class Feedback {
+        +int rating
+        +string purpose
+        +bool achieved
+        +submitFeedback()
+    }
 
     User <|-- Customer
     User <|-- Employee
@@ -306,3 +337,6 @@ classDiagram
 
     HomepageSection "1" --> "*" Product
     Recommendation ..> Product : แนะนำ
+    Recommendation "1" --> "*" ProductView
+    Product "1" --> "*" ProductView
+    Customer ..> Feedback : ส่งแบบประเมิน
