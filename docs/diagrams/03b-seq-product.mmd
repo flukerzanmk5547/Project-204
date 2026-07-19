@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant DB as PostgreSQL
+
+    Note over C,DB: Flow 2 — ดูรายละเอียดสินค้าและสินค้าแนะนำ
+
+    C->>FE: คลิกสินค้า
+    FE->>BE: GET /api/v1/products/:id
+    BE->>DB: query product + variants
+    DB-->>BE: ข้อมูลสินค้า
+    BE-->>FE: รายละเอียดสินค้า
+    FE->>BE: POST /api/v1/recommendations/track
+    BE->>DB: insert product_views
+    FE->>BE: GET /api/v1/recommendations
+    BE-->>FE: สินค้าแนะนำ
+    FE-->>C: แสดงหน้าสินค้า + สินค้าแนะนำ

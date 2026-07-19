@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+
+    Note over C,DB: Flow 3 — สมัครสมาชิก / เข้าสู่ระบบ
+
+    C->>FE: กรอกอีเมล + รหัสผ่าน
+    FE->>BE: POST /api/v1/auth/register หรือ /login
+    BE->>SB: สร้าง / ตรวจสอบบัญชี
+    SB-->>BE: access_token + refresh_token
+    BE->>DB: อ่าน profiles (role)
+    DB-->>BE: profile (customer/employee/admin)
+    BE-->>FE: token + user
+    FE->>FE: เก็บ token ใน AuthContext
+    FE-->>C: เข้าสู่ระบบสำเร็จ

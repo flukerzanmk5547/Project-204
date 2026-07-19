@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant DB as PostgreSQL
+
+    Note over C,DB: Flow 1 — เข้าชมหน้าแรกและค้นหาสินค้า
+
+    C->>FE: เปิดเว็บ /
+    FE->>BE: GET /api/v1/homepage/sections
+    BE->>DB: query homepage_sections + products
+    DB-->>BE: sections
+    BE-->>FE: JSON
+    FE->>BE: GET /api/v1/banners?type=hero
+    BE-->>FE: banners
+    FE-->>C: แสดง Hero + หมวดหมู่ + ดีลสินค้า
+
+    C->>FE: พิมพ์คำค้นหา
+    FE->>BE: GET /api/v1/products?search=...
+    BE->>DB: query products
+    DB-->>BE: รายการสินค้า
+    BE-->>FE: ผลการค้นหา
+    FE-->>C: แสดงผลการค้นหา

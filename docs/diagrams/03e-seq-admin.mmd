@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    actor A as พนักงาน / ผู้ดูแลระบบ
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+
+    Note over A,DB: Flow 5 — จัดการร้านค้า (Employee / Admin)
+
+    A->>FE: เข้าหน้าจัดการ
+    FE->>BE: GET /api/v1/orders (แนบ token)
+    BE->>SB: ตรวจ token + role
+    SB-->>BE: role = employee / admin
+    BE->>DB: query orders
+    DB-->>BE: รายการคำสั่งซื้อ
+    BE-->>FE: orders
+    A->>FE: อัปเดตสถานะคำสั่งซื้อ
+    FE->>BE: PUT /api/v1/orders/:id
+    BE->>DB: update orders.status
+    A->>FE: เพิ่ม / แก้ไขสินค้า
+    FE->>BE: POST หรือ PUT /api/v1/products
+    BE->>DB: insert / update products
+    DB-->>BE: ok
+    BE-->>FE: สำเร็จ
+    FE-->>A: แสดงผลการบันทึก

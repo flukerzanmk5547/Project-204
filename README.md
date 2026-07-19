@@ -544,22 +544,22 @@ classDiagram
     Recommendation ..> Product : แนะนำ
 ```
 
-### 3. Sequence Diagram (ภาพรวมทั้งระบบ)
+### 3. Sequence Diagram
+
+แยกตาม flow การใช้งานเพื่อให้อ่านง่าย (รวมกันครอบคลุมทั้งระบบ)
+
+#### 3.1 เข้าชมหน้าแรกและค้นหาสินค้า
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor C as ลูกค้า
-    actor A as Admin / Employee
     participant FE as Frontend (Next.js)
-    participant CTX as Context (Auth/Cart/Fav)
     participant BE as Backend (Fastify)
-    participant SB as Supabase Auth
     participant DB as PostgreSQL
-    participant PP as PromptPay (planned)
 
-    rect rgb(232,240,254)
-    Note over C,DB: 1) เข้าชมหน้าแรก และเรียกดูสินค้า
+    Note over C,DB: Flow 1 — เข้าชมหน้าแรกและค้นหาสินค้า
+
     C->>FE: เปิดเว็บ /
     FE->>BE: GET /api/v1/homepage/sections
     BE->>DB: query homepage_sections + products
@@ -568,56 +568,81 @@ sequenceDiagram
     FE->>BE: GET /api/v1/banners?type=hero
     BE-->>FE: banners
     FE-->>C: แสดง Hero + หมวดหมู่ + ดีลสินค้า
-    end
 
-    rect rgb(232,246,238)
-    Note over C,DB: 2) ค้นหา / ดูรายละเอียดสินค้า
     C->>FE: พิมพ์คำค้นหา
     FE->>BE: GET /api/v1/products?search=...
     BE->>DB: query products
     DB-->>BE: รายการสินค้า
     BE-->>FE: ผลการค้นหา
+    FE-->>C: แสดงผลการค้นหา
+```
+
+#### 3.2 ดูรายละเอียดสินค้า
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant DB as PostgreSQL
+
+    Note over C,DB: Flow 2 — ดูรายละเอียดสินค้าและสินค้าแนะนำ
+
     C->>FE: คลิกสินค้า
     FE->>BE: GET /api/v1/products/:id
+    BE->>DB: query product + variants
+    DB-->>BE: ข้อมูลสินค้า
     BE-->>FE: รายละเอียดสินค้า
+    FE->>BE: POST /api/v1/recommendations/track
+    BE->>DB: insert product_views
     FE->>BE: GET /api/v1/recommendations
     BE-->>FE: สินค้าแนะนำ
-    FE-->>C: แสดงหน้าสินค้า
-    end
+    FE-->>C: แสดงหน้าสินค้า + สินค้าแนะนำ
+```
 
-    rect rgb(255,244,229)
-    Note over C,SB: 3) สมัครสมาชิก / เข้าสู่ระบบ
+#### 3.3 สมัครสมาชิก / เข้าสู่ระบบ
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+
+    Note over C,DB: Flow 3 — สมัครสมาชิก / เข้าสู่ระบบ
+
     C->>FE: กรอกอีเมล + รหัสผ่าน
     FE->>BE: POST /api/v1/auth/register หรือ /login
-    BE->>SB: สร้าง/ตรวจสอบบัญชี
+    BE->>SB: สร้าง / ตรวจสอบบัญชี
     SB-->>BE: access_token + refresh_token
-    BE->>DB: บันทึก/อ่าน profiles (role)
-    DB-->>BE: profile
+    BE->>DB: อ่าน profiles (role)
+    DB-->>BE: profile (customer/employee/admin)
     BE-->>FE: token + user
-    FE->>CTX: เก็บ token ใน AuthContext
+    FE->>FE: เก็บ token ใน AuthContext
     FE-->>C: เข้าสู่ระบบสำเร็จ
-    end
+```
 
-    rect rgb(243,238,255)
-    Note over C,DB: 4) จัดการตะกร้าและสินค้าโปรด
-    C->>FE: เลือกไซส์ + กดเพิ่มลงตะกร้า
-    FE->>CTX: CartContext.addItem()
-    FE->>BE: POST /api/v1/cart (แนบ Bearer token)
-    BE->>SB: ตรวจสอบ token
-    SB-->>BE: user
+#### 3.4 สั่งซื้อและชำระเงิน
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant DB as PostgreSQL
+    participant PP as PromptPay
+
+    Note over C,PP: Flow 4 — สั่งซื้อและชำระเงิน (planned: ยังไม่ implement ฝั่ง backend)
+
+    C->>FE: เพิ่มสินค้าลงตะกร้า
+    FE->>BE: POST /api/v1/cart (Bearer token)
     BE->>DB: insert cart_items
     DB-->>BE: ok
-    BE-->>FE: ตะกร้าล่าสุด
-    C->>FE: กดหัวใจ (สินค้าโปรด)
-    FE->>CTX: FavoritesContext.toggle() + localStorage
-    end
-
-    rect rgb(255,235,238)
-    Note over C,PP: 5) สั่งซื้อและชำระเงิน (planned — ยังไม่ implement ฝั่ง backend)
-    C->>FE: เข้าหน้า /checkout เลือกที่อยู่
-    FE->>BE: GET /api/v1/addresses
-    BE-->>FE: รายการที่อยู่
-    C->>FE: เลือกวิธีจัดส่ง + กดชำระเงิน
+    C->>FE: เข้า /checkout เลือกที่อยู่ + วิธีจัดส่ง
     FE->>BE: POST /api/v1/orders
     BE->>DB: insert orders + order_items
     DB-->>BE: order_number
@@ -629,178 +654,43 @@ sequenceDiagram
     C->>PP: สแกน QR แล้วโอนเงิน
     loop ทุก 3 วินาที
         FE->>BE: GET /api/v1/payments/:id/status
-        BE->>DB: อ่านสถานะการชำระเงิน
-        DB-->>BE: status
         BE-->>FE: status
     end
-    FE->>CTX: clearCart()
-    FE-->>C: แสดงหน้า "สั่งซื้อสำเร็จ"
-    end
+    FE-->>C: แสดงหน้า "สั่งซื้อสำเร็จ" + ล้างตะกร้า
+```
 
-    rect rgb(232,240,254)
-    Note over C,DB: 6) ดูประวัติคำสั่งซื้อ
-    C->>FE: เข้า /account/orders
-    FE->>BE: GET /api/v1/orders/history
-    BE->>DB: query orders by user_id
-    DB-->>BE: รายการคำสั่งซื้อ
-    BE-->>FE: history
-    FE-->>C: แสดงเลขออเดอร์ / สถานะ / ยอดรวม
-    end
+#### 3.5 จัดการร้านค้า (Employee / Admin)
 
-    rect rgb(232,246,238)
-    Note over A,DB: 7) ฝั่งผู้ดูแลระบบ — จัดการร้านค้า
-    A->>FE: เข้าหน้าจัดการ (Admin)
-    FE->>BE: GET /api/v1/orders (ทั้งหมด)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as พนักงาน / ผู้ดูแลระบบ
+    participant FE as Frontend (Next.js)
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+
+    Note over A,DB: Flow 5 — จัดการร้านค้า (Employee / Admin)
+
+    A->>FE: เข้าหน้าจัดการ
+    FE->>BE: GET /api/v1/orders (แนบ token)
     BE->>SB: ตรวจ token + role
     SB-->>BE: role = employee / admin
-    BE-->>FE: รายการคำสั่งซื้อ
+    BE->>DB: query orders
+    DB-->>BE: รายการคำสั่งซื้อ
+    BE-->>FE: orders
     A->>FE: อัปเดตสถานะคำสั่งซื้อ
     FE->>BE: PUT /api/v1/orders/:id
     BE->>DB: update orders.status
-    A->>FE: เพิ่ม/แก้ไขสินค้า
-    FE->>BE: POST/PUT /api/v1/products
-    BE->>DB: insert/update products
+    A->>FE: เพิ่ม / แก้ไขสินค้า
+    FE->>BE: POST หรือ PUT /api/v1/products
+    BE->>DB: insert / update products
     DB-->>BE: ok
     BE-->>FE: สำเร็จ
     FE-->>A: แสดงผลการบันทึก
-    end
 ```
 
-### 4. ER Diagram (Database Design)
-
-```mermaid
-erDiagram
-    PROFILES ||--o{ CART_ITEMS : "มีสินค้าในตะกร้า"
-    PROFILES ||--o{ ORDERS : "สั่งซื้อ"
-    PROFILES ||--o{ REVIEWS : "เขียนรีวิว"
-    PROFILES ||--o{ ADDRESSES : "มีที่อยู่ (planned)"
-
-    CATEGORIES ||--o{ CATEGORIES : "หมวดหมู่ย่อย"
-    CATEGORIES ||--o{ PRODUCTS : "มีสินค้า"
-
-    PRODUCTS ||--o{ PRODUCT_VARIANTS : "มีตัวเลือก"
-    PRODUCTS ||--o{ CART_ITEMS : "ถูกใส่ตะกร้า"
-    PRODUCTS ||--o{ ORDER_ITEMS : "ถูกสั่งซื้อ"
-    PRODUCTS ||--o{ REVIEWS : "ถูกรีวิว"
-    PRODUCTS ||--o{ PROMOTION_PRODUCTS : "อยู่ในโปรโมชัน"
-
-    ORDERS ||--o{ ORDER_ITEMS : "ประกอบด้วย"
-    ORDERS ||--|| PAYMENTS : "ชำระเงิน (planned)"
-    PRODUCT_VARIANTS ||--o{ ORDER_ITEMS : "ระบุตัวเลือก"
-    PROMOTIONS ||--o{ PROMOTION_PRODUCTS : "ครอบคลุมสินค้า"
-
-    PROFILES {
-        uuid id PK "FK auth.users"
-        text email
-        text full_name
-        text phone
-        text avatar_url
-        text role "customer | employee | admin (+super_admin planned)"
-        timestamptz created_at
-    }
-    CATEGORIES {
-        uuid id PK
-        text name
-        text slug UK
-        text route_path UK
-        uuid parent_id FK "หมวดหมู่แม่"
-        int level
-        int sort_order
-        bool is_active
-    }
-    PRODUCTS {
-        uuid id PK
-        text name
-        text slug UK
-        text sku UK
-        numeric price
-        numeric original_price
-        text brand
-        uuid category_id FK
-        jsonb images
-        jsonb tags
-        int stock
-        bool is_active
-        bool is_featured
-    }
-    PRODUCT_VARIANTS {
-        uuid id PK
-        uuid product_id FK
-        text sku UK
-        numeric price_override
-        int stock
-        bool is_active
-    }
-    CART_ITEMS {
-        uuid id PK
-        uuid user_id FK
-        uuid product_id FK
-        int quantity
-        text size
-        text color
-    }
-    ORDERS {
-        uuid id PK
-        uuid user_id FK
-        text status "pending|paid|shipped|delivered|cancelled"
-        numeric total
-        timestamptz created_at
-    }
-    ORDER_ITEMS {
-        uuid id PK
-        uuid order_id FK
-        uuid product_id FK
-        uuid variant_id FK
-        int quantity
-        numeric price
-    }
-    REVIEWS {
-        uuid id PK
-        uuid user_id FK
-        uuid product_id FK
-        int rating "1-5"
-        text title
-        text comment
-        bool is_verified
-    }
-    PROMOTIONS {
-        uuid id PK
-        text name
-        text type
-        numeric value
-        timestamptz start_at
-        timestamptz end_at
-    }
-    PROMOTION_PRODUCTS {
-        uuid id PK
-        uuid promotion_id FK
-        uuid product_id FK
-    }
-    ADDRESSES {
-        uuid id PK "PLANNED - ยังไม่ได้สร้างตาราง"
-        uuid user_id FK
-        text full_name
-        text phone
-        text province
-        text amphoe
-        text district
-        text postal_code
-        text address
-        bool is_default
-    }
-    PAYMENTS {
-        uuid id PK "PLANNED - ยังไม่ได้สร้างตาราง"
-        uuid order_id FK
-        text method "promptpay|credit|bank"
-        numeric amount
-        numeric ref_amount
-        text status "pending|confirmed|expired"
-        text promptpay_number
-        timestamptz expires_at
-    }
-```
-
-### 5. System Architecture
+### 4. System Architecture
 
 ```mermaid
 flowchart TB
@@ -845,7 +735,7 @@ flowchart TB
     SVC -.เรียกชำระเงิน.-> EXT
 ```
 
-### 6. Deployment Diagram
+### 5. Deployment Diagram
 
 ```mermaid
 flowchart TB
