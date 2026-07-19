@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe — Sport Store</title>
+<style>
+  :root{
+    --ink:#3a3a3a; --sub:#8a8a8a; --line:#c9c9c9; --box:#ededed;
+    --bar:#d7d7d7; --frame:#b3b3b3; --bg:#f4f4f4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI","Noto Sans Thai",Tahoma,sans-serif; font-size:13px;
+    padding:32px 20px;
+  }
+  h1.doc{font-size:20px; text-align:center; margin:0 0 4px;}
+  p.doc{text-align:center; color:var(--sub); margin:0 0 32px; font-size:12px;}
+  .frame{
+    background:#fff; border:1.5px solid var(--frame); border-radius:6px;
+    max-width:1100px; margin:0 auto 40px; overflow:hidden;
+  }
+  .cap{
+    background:#3a3a3a; color:#fff; font-size:12px; font-weight:600;
+    padding:6px 14px; letter-spacing:.3px;
+  }
+  .cap span{color:#c9c9c9; font-weight:400;}
+  .pad{padding:16px;}
+  /* wireframe atoms */
+  .ph{
+    background:
+      linear-gradient(to top right, transparent 49.3%, var(--line) 49.3%, var(--line) 50.7%, transparent 50.7%),
+      linear-gradient(to top left, transparent 49.3%, var(--line) 49.3%, var(--line) 50.7%, transparent 50.7%),
+      var(--box);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    color:var(--sub); font-size:11px;
+  }
+  .bar{height:9px; background:var(--bar); border-radius:3px; margin:5px 0;}
+  .bar.t{height:13px; background:#cfcfcf;}
+  .w20{width:20%;}.w30{width:30%;}.w40{width:40%;}.w50{width:50%;}
+  .w60{width:60%;}.w70{width:70%;}.w80{width:80%;}.w90{width:90%;}.w100{width:100%;}
+  .btn{
+    border:1.4px solid #7d7d7d; border-radius:5px; padding:9px 0; text-align:center;
+    color:#4a4a4a; font-size:12px; background:#f7f7f7;
+  }
+  .btn.solid{background:#6f6f6f; color:#fff; border-color:#6f6f6f;}
+  .chip{border:1px solid var(--line); border-radius:4px; background:#f5f5f5; padding:6px 10px; font-size:11px; color:#6a6a6a;}
+  .pill{border:1px solid var(--line); border-radius:999px; padding:5px 12px; font-size:11px; color:#6a6a6a; background:#f5f5f5;}
+  .row{display:flex; gap:12px;}
+  .between{display:flex; align-items:center; justify-content:space-between;}
+  .center{display:flex; align-items:center; justify-content:center;}
+  .navbar{background:#3a3a3a; color:#fff; padding:10px 14px; display:flex; align-items:center; gap:12px; font-size:12px;}
+  .search{flex:1; background:#fff; border-radius:4px; height:26px;}
+  .ic{width:22px;height:22px;border:1px solid #9a9a9a;border-radius:4px;display:inline-block;}
+  .subnav{border-bottom:1px solid var(--line); padding:9px 14px; display:flex; gap:18px; color:#7a7a7a; font-size:12px;}
+  .grid5{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .card{border:1px solid var(--line); border-radius:5px; padding:8px; background:#fff;}
+  .footer{background:#f0f0f0; border-top:1px solid var(--line); padding:14px; display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  .tag{display:inline-block; font-size:10px; color:#7a7a7a; margin-bottom:6px; border-bottom:1px dashed var(--line); padding-bottom:3px;}
+  .note{max-width:1100px; margin:0 auto 26px; font-size:12px; color:var(--sub); text-align:center;}
+  .sizebox{border:1px solid var(--line); border-radius:4px; height:30px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#7a7a7a; background:#f7f7f7;}
+</style>
+</head>
+<body>
+
+<h1 class="doc">Wireframe — Sport Store</h1>
+<p class="doc">แบบร่างโครงหน้าจอ (Low-fidelity) · screenshot แต่ละเฟรมไปใส่หัวข้อ 2.4 Wireframe</p>
+
+<!-- 1. HOMEPAGE -->
+<div class="frame">
+  <div class="cap">1. หน้าแรก (Homepage) <span>/ · Desktop 1440px</span></div>
+  <div class="navbar">
+    <b>SPORTGEAR</b>
+    <div class="search"></div>
+    <span class="ic"></span><span class="ic"></span><span class="ic"></span>
+  </div>
+  <div class="subnav"><span>หน้าแรก</span><span>ผู้ชาย</span><span>ผู้หญิง</span><span>เด็ก</span><span>อุปกรณ์กีฬา</span><span>โปรโมชัน</span></div>
+  <div class="pad">
+    <div class="ph" style="height:180px; margin-bottom:14px;">Hero Banner</div>
+    <div class="tag">หมวดหมู่ยอดนิยม</div>
+    <div class="grid5" style="margin-bottom:16px;">
+      <div class="center" style="flex-direction:column; gap:6px;"><div class="ph" style="width:56px;height:56px;border-radius:50%;"></div><div class="bar w80"></div></div>
+      <div class="center" style="flex-direction:column; gap:6px;"><div class="ph" style="width:56px;height:56px;border-radius:50%;"></div><div class="bar w80"></div></div>
+      <div class="center" style="flex-direction:column; gap:6px;"><div class="ph" style="width:56px;height:56px;border-radius:50%;"></div><div class="bar w80"></div></div>
+      <div class="center" style="flex-direction:column; gap:6px;"><div class="ph" style="width:56px;height:56px;border-radius:50%;"></div><div class="bar w80"></div></div>
+      <div class="center" style="flex-direction:column; gap:6px;"><div class="ph" style="width:56px;height:56px;border-radius:50%;"></div><div class="bar w80"></div></div>
+    </div>
+    <div class="between" style="margin-bottom:8px;"><div class="bar t w30"></div><div class="pill">ดูทั้งหมด</div></div>
+    <div class="grid5">
+      <div class="card"><div class="ph" style="height:110px;margin-bottom:8px;">รูปสินค้า</div><div class="bar w40"></div><div class="bar w90"></div><div class="bar w60"></div></div>
+      <div class="card"><div class="ph" style="height:110px;margin-bottom:8px;">รูปสินค้า</div><div class="bar w40"></div><div class="bar w90"></div><div class="bar w60"></div></div>
+      <div class="card"><div class="ph" style="height:110px;margin-bottom:8px;">รูปสินค้า</div><div class="bar w40"></div><div class="bar w90"></div><div class="bar w60"></div></div>
+      <div class="card"><div class="ph" style="height:110px;margin-bottom:8px;">รูปสินค้า</div><div class="bar w40"></div><div class="bar w90"></div><div class="bar w60"></div></div>
+      <div class="card"><div class="ph" style="height:110px;margin-bottom:8px;">รูปสินค้า</div><div class="bar w40"></div><div class="bar w90"></div><div class="bar w60"></div></div>
+    </div>
+  </div>
+  <div class="footer">
+    <div><div class="bar w60"></div><div class="bar w80"></div><div class="bar w50"></div></div>
+    <div><div class="bar w60"></div><div class="bar w80"></div><div class="bar w50"></div></div>
+    <div><div class="bar w60"></div><div class="bar w80"></div><div class="bar w50"></div></div>
+    <div><div class="bar w60"></div><div class="bar w80"></div><div class="bar w50"></div></div>
+  </div>
+</div>
+
+<!-- 2. PRODUCT DETAIL -->
+<div class="frame">
+  <div class="cap">2. รายละเอียดสินค้า (Product Detail) <span>/product/[id]</span></div>
+  <div class="pad">
+    <div class="bar w40" style="margin-bottom:14px;"></div>
+    <div class="row">
+      <div style="width:56%;" class="row">
+        <div style="display:flex;flex-direction:column;gap:8px;width:64px;">
+          <div class="ph" style="height:56px;"></div><div class="ph" style="height:56px;"></div><div class="ph" style="height:56px;"></div>
+        </div>
+        <div class="ph" style="flex:1;height:300px;">รูปสินค้าหลัก</div>
+      </div>
+      <div style="width:44%;">
+        <div class="pill" style="display:inline-block;margin-bottom:8px;">สินค้าใหม่</div>
+        <div class="bar t w90"></div><div class="bar t w70"></div>
+        <div class="bar w30" style="margin:10px 0;"></div>
+        <div class="bar t w40" style="height:20px;background:#c2c2c2;"></div>
+        <div class="tag" style="margin-top:14px;">เลือกขนาด</div>
+        <div class="grid5" style="margin-bottom:14px;">
+          <div class="sizebox">39</div><div class="sizebox">40</div><div class="sizebox">41</div><div class="sizebox">42</div><div class="sizebox">43</div>
+        </div>
+        <div class="row" style="margin-bottom:12px;">
+          <div class="chip">− &nbsp; 1 &nbsp; +</div>
+        </div>
+        <div class="btn solid" style="margin-bottom:10px;">เพิ่มลงตะกร้า</div>
+        <div class="ph" style="height:60px;">ข้อมูลจัดส่ง / รับที่ร้าน</div>
+      </div>
+    </div>
+    <div class="tag" style="margin-top:20px;">สินค้าที่คุณอาจชอบ</div>
+    <div class="grid4">
+      <div class="card"><div class="ph" style="height:90px;margin-bottom:6px;"></div><div class="bar w40"></div><div class="bar w90"></div></div>
+      <div class="card"><div class="ph" style="height:90px;margin-bottom:6px;"></div><div class="bar w40"></div><div class="bar w90"></div></div>
+      <div class="card"><div class="ph" style="height:90px;margin-bottom:6px;"></div><div class="bar w40"></div><div class="bar w90"></div></div>
+      <div class="card"><div class="ph" style="height:90px;margin-bottom:6px;"></div><div class="bar w40"></div><div class="bar w90"></div></div>
+    </div>
+    <div class="tag" style="margin-top:20px;">รีวิว</div>
+    <div class="bar w80"></div><div class="bar w90"></div><div class="bar w60"></div>
+  </div>
+</div>
+
+<!-- 3. CART -->
+<div class="frame">
+  <div class="cap">3. ตะกร้าสินค้า (Cart) <span>/cart</span></div>
+  <div class="pad">
+    <div class="bar t w30" style="margin-bottom:14px;"></div>
+    <div class="row">
+      <div style="flex:1;">
+        <div class="card row" style="align-items:center; gap:12px; margin-bottom:10px;">
+          <div class="chip" style="width:20px;height:20px;padding:0;"></div>
+          <div class="ph" style="width:90px;height:90px;">รูป</div>
+          <div style="flex:1;"><div class="bar t w40"></div><div class="bar w80"></div><div class="bar w30"></div></div>
+          <div class="chip">− 1 +</div>
+        </div>
+        <div class="card row" style="align-items:center; gap:12px; margin-bottom:10px;">
+          <div class="chip" style="width:20px;height:20px;padding:0;"></div>
+          <div class="ph" style="width:90px;height:90px;">รูป</div>
+          <div style="flex:1;"><div class="bar t w40"></div><div class="bar w80"></div><div class="bar w30"></div></div>
+          <div class="chip">− 1 +</div>
+        </div>
+      </div>
+      <div style="width:320px;">
+        <div class="card">
+          <div class="bar t w60" style="margin-bottom:12px;"></div>
+          <div class="between"><div class="bar w40"></div><div class="bar w20"></div></div>
+          <div class="between"><div class="bar w40"></div><div class="bar w20"></div></div>
+          <div class="between" style="margin:10px 0;"><div class="bar t w40"></div><div class="bar t w30"></div></div>
+          <div class="ph" style="height:34px;margin-bottom:10px;">ช่องใส่โค้ดส่วนลด</div>
+          <div class="btn solid" style="margin-bottom:8px;">ดำเนินการชำระเงิน</div>
+          <div class="btn">ช้อปปิ้งต่อ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. CHECKOUT -->
+<div class="frame">
+  <div class="cap">4. ชำระเงิน (Checkout) <span>/checkout · เลือกที่อยู่ → จัดส่ง → ชำระเงิน</span></div>
+  <div class="pad">
+    <div class="bar t w30" style="margin-bottom:6px;"></div>
+    <div class="row" style="gap:8px;margin-bottom:14px;">
+      <div class="pill">1. ที่อยู่</div><div class="pill">2. จัดส่ง</div><div class="pill">3. ชำระเงิน</div>
+    </div>
+    <div class="row">
+      <div style="flex:1;">
+        <div class="tag">เลือกที่อยู่จัดส่ง</div>
+        <div class="card row" style="align-items:flex-start;gap:10px;margin-bottom:8px;">
+          <div class="chip" style="width:18px;height:18px;border-radius:50%;padding:0;"></div>
+          <div style="flex:1;"><div class="bar t w40"></div><div class="bar w80"></div><div class="bar w60"></div></div>
+        </div>
+        <div class="card row" style="align-items:flex-start;gap:10px;margin-bottom:14px;">
+          <div class="chip" style="width:18px;height:18px;border-radius:50%;padding:0;"></div>
+          <div style="flex:1;"><div class="bar t w40"></div><div class="bar w80"></div><div class="bar w60"></div></div>
+        </div>
+        <div class="tag">วิธีชำระเงิน</div>
+        <div class="card between" style="margin-bottom:8px;"><div class="bar w40"></div><div class="ph" style="width:40px;height:22px;">QR</div></div>
+        <div class="card between" style="margin-bottom:8px;"><div class="bar w40"></div><div class="chip">บัตร</div></div>
+        <div class="card between" style="margin-bottom:14px;"><div class="bar w40"></div><div class="chip">โอน</div></div>
+        <div class="btn solid">ชำระเงิน</div>
+      </div>
+      <div style="width:340px;">
+        <div class="card">
+          <div class="bar t w60" style="margin-bottom:12px;"></div>
+          <div class="row" style="gap:8px;margin-bottom:8px;"><div class="ph" style="width:44px;height:44px;"></div><div style="flex:1;"><div class="bar w80"></div><div class="bar w40"></div></div></div>
+          <div class="between"><div class="bar w40"></div><div class="bar w20"></div></div>
+          <div class="between"><div class="bar w40"></div><div class="bar w20"></div></div>
+          <div class="between" style="margin-top:10px;"><div class="bar t w40"></div><div class="bar t w30"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. ACCOUNT -->
+<div class="frame">
+  <div class="cap">5. บัญชีของฉัน (Account) <span>/account</span></div>
+  <div class="pad">
+    <div class="bar t w30" style="margin-bottom:14px;"></div>
+    <div class="card row" style="align-items:center;gap:14px;margin-bottom:16px;">
+      <div class="ph" style="width:64px;height:64px;border-radius:50%;"></div>
+      <div style="flex:1;"><div class="bar t w40"></div><div class="bar w60"></div><div class="bar w30"></div></div>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="ph" style="width:40px;height:40px;margin-bottom:10px;"></div><div class="bar t w70"></div><div class="bar w90"></div></div>
+      <div class="card"><div class="ph" style="width:40px;height:40px;margin-bottom:10px;"></div><div class="bar t w70"></div><div class="bar w90"></div></div>
+      <div class="card"><div class="ph" style="width:40px;height:40px;margin-bottom:10px;"></div><div class="bar t w70"></div><div class="bar w90"></div></div>
+    </div>
+    <div class="bar w30" style="margin-top:16px;"></div>
+    <p style="color:var(--sub);font-size:11px;margin:6px 0 0;">การ์ดเมนู: คำสั่งซื้อของฉัน · สมุดที่อยู่ · สินค้าโปรด &nbsp;|&nbsp; ปุ่มออกจากระบบ</p>
+  </div>
+</div>
+
+<p class="note">— ทั้ง 5 เฟรมเป็นแบบร่าง (ยังไม่ใส่สี/ภาพจริง) เพื่อยืนยัน layout ก่อนพัฒนา UI จริง —</p>
+
+</body>
+</html>

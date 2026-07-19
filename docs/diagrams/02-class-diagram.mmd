@@ -1,0 +1,168 @@
+classDiagram
+    class User {
+        +string id
+        +string email
+        +string full_name
+        +string phone
+        +string avatar_url
+        +string role
+        +register()
+        +login()
+        +logout()
+        +getProfile()
+        +updateProfile()
+        +refreshToken()
+    }
+    class Customer {
+        +placeOrder()
+        +viewOrderHistory()
+        +manageFavorites()
+        +manageAddress()
+    }
+    class Admin {
+        +manageProduct()
+        +manageCategory()
+        +manageOrder()
+        +manageBanner()
+        +viewSalesReport()
+    }
+    class SuperAdmin {
+        +manageAdminAccount()
+        +assignPermission()
+        +configureSystem()
+        +viewAllReports()
+    }
+
+    User <|-- Customer
+    User <|-- Admin
+    Admin <|-- SuperAdmin
+    class Address {
+        +string id
+        +string user_id
+        +string full_name
+        +string phone
+        +string postal_code
+        +string province
+        +string amphoe
+        +string district
+        +string address
+        +bool is_default
+        +getAll()
+        +create()
+        +update()
+        +delete()
+        +setDefault()
+    }
+    class Product {
+        +string id
+        +string name
+        +string slug
+        +number price
+        +number original_price
+        +string brand
+        +List~string~ images
+        +List~string~ tags
+        +number rating
+        +int review_count
+        +bool is_new
+        +getById()
+        +search()
+        +getByCategory()
+        +getPopular()
+    }
+    class Category {
+        +string id
+        +string name
+        +string slug
+        +string route_path
+        +string parent_id
+        +int level
+        +int sort_order
+        +getTree()
+        +getByRoute()
+        +getChildren()
+    }
+    class Cart {
+        +List~CartItem~ items
+        +int totalItems
+        +number totalPrice
+        +addItem()
+        +removeItem()
+        +updateQuantity()
+        +clearCart()
+        +getTotalPrice()
+    }
+    class CartItem {
+        +string id
+        +string product_id
+        +string name
+        +string brand
+        +string image
+        +number price
+        +string size
+        +int quantity
+    }
+    class Favorite {
+        +List~FavoriteItem~ items
+        +int totalItems
+        +addFavorite()
+        +removeFavorite()
+        +toggleFavorite()
+        +isFavorite()
+        +clearFavorites()
+    }
+    class Order {
+        +string id
+        +string order_number
+        +string status
+        +string shipping_name
+        +string shipping_phone
+        +string shipping_address
+        +string payment_method
+        +number subtotal
+        +number discount_total
+        +number shipping_cost
+        +number total
+        +datetime created_at
+        +create()
+        +getHistory()
+        +getDetail()
+        +calculateTotal()
+        +updateStatus()
+    }
+    class OrderItem {
+        +string id
+        +string order_id
+        +string product_id
+        +string name
+        +string brand
+        +string size
+        +number price
+        +int quantity
+        +getSubtotal()
+    }
+    class Payment {
+        +string id
+        +string order_id
+        +string method
+        +number amount
+        +number ref_amount
+        +string status
+        +string promptpay_number
+        +datetime expires_at
+        +datetime confirmed_at
+        +createPayment()
+        +generateQR()
+        +checkStatus()
+        +confirm()
+    }
+
+    User "1" --> "*" Address
+    User "1" --> "*" Order
+    User "1" --> "*" Favorite
+    Cart "1" --> "*" CartItem
+    Order "1" --> "*" OrderItem
+    Product "1" --> "*" OrderItem
+    Order "1" --> "1" Payment
+    Category "1" --> "*" Category
+    Product "*" --> "1" Category

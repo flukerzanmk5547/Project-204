@@ -179,6 +179,208 @@ http://localhost:3000
 - `/account/orders/[id]` หน้ารายละเอียดคำสั่งซื้อ
 - `/account/addresses` หน้าสมุดที่อยู่จัดส่ง
 
+## แผนภาพระบบ (System Diagrams)
+
+ไฟล์ต้นฉบับทั้งหมดอยู่ที่ [`docs/diagrams/`](docs/diagrams) (ไฟล์ `.mmd` + รูป `.png`)
+ส่วน Wireframe / Prototype เปิดดูได้ที่ [`docs/wireframes.html`](docs/wireframes.html) และ [`docs/prototype.html`](docs/prototype.html)
+
+### 1. Use Case Diagram
+
+ผู้ใช้งานในระบบมี 4 บทบาท: **ลูกค้า (Guest/Member)**, **ผู้ดูแลระบบ (Admin)**, **ผู้ดูแลระบบสูงสุด (Super Admin)** และ **PromptPay** (ระบบชำระเงินภายนอก)
+
+```mermaid
+flowchart LR
+    Guest(["ผู้ใช้ทั่วไป"])
+    Member(["สมาชิก"])
+    Admin(["ผู้ดูแลระบบ"])
+    SAdmin(["ผู้ดูแลระบบสูงสุด"])
+    PP(["PromptPay"])
+
+    subgraph SYS["ระบบ Sport Store"]
+        UC1["ดู / ค้นหาสินค้า"]
+        UC2["ดูรายละเอียดสินค้า"]
+        UC3["จัดการตะกร้า"]
+        UC4["สมัครสมาชิก"]
+        UC5["เข้าสู่ระบบ"]
+        UC6["จัดการสินค้าโปรด"]
+        UC7["จัดการที่อยู่จัดส่ง"]
+        UC8["ทำรายการสั่งซื้อ (Checkout)"]
+        UC9["ชำระเงิน PromptPay"]
+        UC10["ดูประวัติคำสั่งซื้อ"]
+        UC11["จัดการสินค้า / หมวดหมู่"]
+        UC12["จัดการคำสั่งซื้อ / แบนเนอร์"]
+        UC13["ดูรายงานยอดขาย"]
+        UC14["จัดการบัญชีผู้ดูแลระบบ"]
+        UC15["กำหนดสิทธิ์การเข้าถึง"]
+        UC16["ตั้งค่าระบบ"]
+    end
+
+    Guest --- UC1
+    Guest --- UC2
+    Guest --- UC3
+    Guest --- UC4
+    Member --- UC5
+    Member --- UC6
+    Member --- UC7
+    Member --- UC8
+    Member --- UC10
+    UC8 -. include .-> UC7
+    UC8 -. include .-> UC9
+    UC9 -. include .-> UC10
+    UC9 --- PP
+    Admin --- UC11
+    Admin --- UC12
+    Admin --- UC13
+    SAdmin --- UC14
+    SAdmin --- UC15
+    SAdmin --- UC16
+    SAdmin -. สืบทอดสิทธิ์ .-> Admin
+```
+
+### 2. Class Diagram
+
+```mermaid
+classDiagram
+    class User {
+        +string id
+        +string email
+        +string full_name
+        +string phone
+        +string role
+        +register()
+        +login()
+        +logout()
+        +getProfile()
+        +updateProfile()
+    }
+    class Customer {
+        +placeOrder()
+        +viewOrderHistory()
+        +manageFavorites()
+        +manageAddress()
+    }
+    class Admin {
+        +manageProduct()
+        +manageCategory()
+        +manageOrder()
+        +manageBanner()
+        +viewSalesReport()
+    }
+    class SuperAdmin {
+        +manageAdminAccount()
+        +assignPermission()
+        +configureSystem()
+    }
+    class Product {
+        +string id
+        +string name
+        +number price
+        +string brand
+        +getById()
+        +search()
+    }
+    class Category {
+        +string id
+        +string name
+        +string parent_id
+        +getTree()
+    }
+    class Cart {
+        +int totalItems
+        +number totalPrice
+        +addItem()
+        +removeItem()
+        +clearCart()
+    }
+    class Order {
+        +string id
+        +string order_number
+        +string status
+        +number total
+        +create()
+        +getHistory()
+        +updateStatus()
+    }
+    class OrderItem {
+        +string id
+        +int quantity
+        +number price
+    }
+    class Payment {
+        +string id
+        +string method
+        +string status
+        +createPayment()
+        +generateQR()
+        +checkStatus()
+    }
+    class Address {
+        +string id
+        +string province
+        +string postal_code
+        +bool is_default
+        +create()
+        +setDefault()
+    }
+
+    User <|-- Customer
+    User <|-- Admin
+    Admin <|-- SuperAdmin
+    Customer "1" --> "*" Address
+    Customer "1" --> "*" Order
+    Cart "1" --> "*" OrderItem
+    Order "1" --> "*" OrderItem
+    Product "1" --> "*" OrderItem
+    Order "1" --> "1" Payment
+    Product "*" --> "1" Category
+    Category "1" --> "*" Category
+```
+
+### 3. Sequence Diagram — สั่งซื้อและชำระเงิน (PromptPay)
+
+```mermaid
+sequenceDiagram
+    actor C as ลูกค้า
+    participant FE as Frontend Next.js
+    participant BE as Backend Fastify
+    participant DB as Database Supabase
+    participant PP as PromptPay
+    C->>FE: เลือกที่อยู่ + วิธีจัดส่ง แล้วกดชำระเงิน
+    FE->>BE: POST /api/v1/orders
+    BE->>DB: บันทึกคำสั่งซื้อ
+    DB-->>BE: order_number
+    BE-->>FE: คืนข้อมูลคำสั่งซื้อ
+    FE->>BE: POST /api/v1/payments
+    BE->>PP: สร้าง QR PromptPay
+    PP-->>BE: qr_image, payment.id
+    BE-->>FE: คืน qr_image
+    C->>PP: สแกน QR แล้วโอนเงิน
+    loop ทุก 3 วินาที
+        FE->>BE: GET /api/v1/payments/:id/status
+        BE-->>FE: status
+    end
+    FE-->>C: แสดงหน้าสั่งซื้อสำเร็จ + ล้างตะกร้า
+```
+
+### 4. Deployment Diagram
+
+```mermaid
+flowchart TB
+    User(["ผู้ใช้ (Browser)"])
+    subgraph SERVER["เซิร์ฟเวอร์ — Docker Compose"]
+        Nginx["Nginx<br/>(Reverse Proxy / SSL)"]
+        FE["Frontend Container<br/>Next.js"]
+        BE["Backend Container<br/>Fastify API"]
+    end
+    DB[("Supabase<br/>PostgreSQL")]
+
+    User -->|HTTPS| Nginx
+    Nginx -->|route /| FE
+    Nginx -->|route /api| BE
+    FE -->|เรียก API| BE
+    BE -->|query ข้อมูล| DB
+```
+
 ## หมายเหตุการพัฒนา
 
 ระบบนี้ออกแบบเป็น full-stack web application โดย frontend เรียกข้อมูลผ่าน backend API และ backend เชื่อมต่อฐานข้อมูล Supabase หากต้องการนำไปใช้งานจริงควรตั้งค่า environment variables ให้ครบ ตรวจสอบสิทธิ์การเข้าถึงฐานข้อมูล และทดสอบ API ก่อน deploy
@@ -190,7 +392,7 @@ http://localhost:3000
 | 66083478 | ณัฐมน สุโพธิ์ | T002/L002 | นักพัฒนาส่วนหน้าและผู้ทดสอบคุณภาพระบบ (Frontend Developer & QA) |
 | 67159957 | พลช ชูตระกูลวงศ์ | T003/L005 | นักพัฒนา Full-stack นักวิเคราะห์ระบบ และผู้ทดสอบคุณภาพระบบ (Full-stack Developer, System Analyst & QA) |
 | 67130409 | เลปกร ศรีสมุทร | T003/L004 | นักพัฒนา Full-stack (Full-stack Developer) |
-| 67126710 | ชิษณุพงศ์ สาตร์แก้ว | T003/L005 | นักการทูต ChatGPT |
+| 67126710 | ชิษณุพงศ์ สาตร์แก้ว | T003/L005 | ผู้จัดการโครงการ (Project Manager - PM) |
 
 
 ## Url

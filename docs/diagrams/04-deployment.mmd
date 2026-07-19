@@ -1,0 +1,14 @@
+flowchart TB
+    User(["ผู้ใช้ (Browser)"])
+    subgraph SERVER["เซิร์ฟเวอร์ — Docker Compose"]
+        Nginx["Nginx<br/>(Reverse Proxy / SSL)"]
+        FE["Frontend Container<br/>Next.js"]
+        BE["Backend Container<br/>Fastify API"]
+    end
+    DB[("Supabase<br/>PostgreSQL")]
+
+    User -->|HTTPS| Nginx
+    Nginx -->|route /| FE
+    Nginx -->|route /api| BE
+    FE -->|เรียก API| BE
+    BE -->|query ข้อมูล| DB

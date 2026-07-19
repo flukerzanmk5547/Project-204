@@ -1,0 +1,21 @@
+sequenceDiagram
+    actor C as ลูกค้า
+    participant FE as Frontend Next.js
+    participant BE as Backend Fastify
+    participant DB as Database Supabase
+    participant PP as PromptPay
+    C->>FE: เลือกที่อยู่ + วิธีจัดส่ง แล้วกดชำระเงิน
+    FE->>BE: POST /api/v1/orders
+    BE->>DB: บันทึกคำสั่งซื้อ
+    DB-->>BE: order_number
+    BE-->>FE: คืนข้อมูลคำสั่งซื้อ
+    FE->>BE: POST /api/v1/payments
+    BE->>PP: สร้าง QR PromptPay
+    PP-->>BE: qr_image, payment.id
+    BE-->>FE: คืน qr_image
+    C->>PP: สแกน QR แล้วโอนเงิน
+    loop ทุก 3 วินาที
+        FE->>BE: GET /api/v1/payments/:id/status
+        BE-->>FE: status
+    end
+    FE-->>C: แสดงหน้าสั่งซื้อสำเร็จ + ล้างตะกร้า

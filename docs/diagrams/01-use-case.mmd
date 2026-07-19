@@ -1,0 +1,46 @@
+flowchart LR
+    Guest(["ผู้ใช้ทั่วไป"])
+    Member(["สมาชิก"])
+    Admin(["ผู้ดูแลระบบ"])
+    SAdmin(["ผู้ดูแลระบบสูงสุด"])
+    PP(["PromptPay"])
+
+    subgraph SYS["ระบบ Sport Store"]
+        UC1["ดู / ค้นหาสินค้า"]
+        UC2["ดูรายละเอียดสินค้า"]
+        UC3["จัดการตะกร้า"]
+        UC4["สมัครสมาชิก"]
+        UC5["เข้าสู่ระบบ"]
+        UC6["จัดการสินค้าโปรด"]
+        UC7["จัดการที่อยู่จัดส่ง"]
+        UC8["ทำรายการสั่งซื้อ (Checkout)"]
+        UC9["ชำระเงิน PromptPay"]
+        UC10["ดูประวัติคำสั่งซื้อ"]
+        UC11["จัดการสินค้า / หมวดหมู่"]
+        UC12["จัดการคำสั่งซื้อ / แบนเนอร์"]
+        UC13["ดูรายงานยอดขาย"]
+        UC14["จัดการบัญชีผู้ดูแลระบบ"]
+        UC15["กำหนดสิทธิ์การเข้าถึง"]
+        UC16["ตั้งค่าระบบ"]
+    end
+
+    Guest --- UC1
+    Guest --- UC2
+    Guest --- UC3
+    Guest --- UC4
+    Member --- UC5
+    Member --- UC6
+    Member --- UC7
+    Member --- UC8
+    Member --- UC10
+    UC8 -. include .-> UC7
+    UC8 -. include .-> UC9
+    UC9 -. include .-> UC10
+    UC9 --- PP
+    Admin --- UC11
+    Admin --- UC12
+    Admin --- UC13
+    SAdmin --- UC14
+    SAdmin --- UC15
+    SAdmin --- UC16
+    SAdmin -. สืบทอดสิทธิ์ .-> Admin

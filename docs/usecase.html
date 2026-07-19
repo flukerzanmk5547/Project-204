@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0;background:#0c1a2b;}
+  svg{display:block;font-family:"Segoe UI","Noto Sans Thai",Tahoma,sans-serif;}
+</style>
+</head>
+<body>
+<svg id="d" width="1080" height="660" viewBox="0 0 1080 660" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const NS="http://www.w3.org/2000/svg";
+const svg=document.getElementById("d");
+function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function text(x,y,s,o={}){const t=el("text",Object.assign({x,y,"text-anchor":"middle","dominant-baseline":"middle",fill:o.fill||"#eaf3fb","font-size":o.fs||11,"font-weight":o.fw||400},o.attr||{}));t.textContent=s;svg.appendChild(t);return t;}
+
+svg.appendChild(el("rect",{x:0,y:0,width:1080,height:660,fill:"#0c1a2b"}));
+
+text(540,38,"แผนภาพ Use Case — ระบบ Sport Store",{fs:25,fw:800,fill:"#ffffff"});
+text(540,64,"ฟังก์ชันของลูกค้า ผู้ดูแลระบบ ผู้ดูแลระบบสูงสุด และระบบชำระเงิน (PromptPay)",{fs:13,fill:"#8fb0c8"});
+
+// system boundary
+svg.appendChild(el("rect",{x:280,y:100,width:520,height:410,rx:16,fill:"#0f2237",stroke:"#2f5a7d","stroke-width":1.5}));
+text(540,124,"ระบบ Sport Store",{fs:15,fw:700,fill:"#46b6d9"});
+svg.appendChild(el("line",{x1:300,y1:316,x2:780,y2:316,stroke:"#274a68","stroke-width":1.2,"stroke-dasharray":"5 5"}));
+svg.appendChild(el("line",{x1:300,y1:440,x2:780,y2:440,stroke:"#274a68","stroke-width":1.2,"stroke-dasharray":"5 5"}));
+
+const colX=[372,540,708];
+const PW=152,PH=38;
+const C_BLUE="#3d7bf7", A_TEAL="#28b295", S_PURPLE="#a06be0";
+
+const UC=[
+ {t:"สมัคร / เข้าสู่ระบบ",x:colX[0],y:176,g:"c"},
+ {t:"ดูรายละเอียดสินค้า",x:colX[1],y:176,g:"c"},
+ {t:"ดูประวัติคำสั่งซื้อ",x:colX[2],y:176,g:"c"},
+ {t:"ดูสินค้า",x:colX[0],y:230,g:"c"},
+ {t:"เพิ่มลงตะกร้า",x:colX[1],y:230,g:"c",id:"cart"},
+ {t:"จัดการสินค้าโปรด",x:colX[2],y:230,g:"c"},
+ {t:"ค้นหาสินค้า",x:colX[0],y:284,g:"c"},
+ {t:"สั่งซื้อ / ชำระเงิน",x:colX[1],y:284,g:"c",id:"pay"},
+ {t:"จัดการที่อยู่จัดส่ง",x:colX[2],y:284,g:"c"},
+ {t:"จัดการสินค้า",x:colX[0],y:353,g:"a"},
+ {t:"จัดการหมวดหมู่",x:colX[1],y:353,g:"a"},
+ {t:"จัดการคำสั่งซื้อ",x:colX[2],y:353,g:"a"},
+ {t:"แบนเนอร์ / โปรโมชัน",x:colX[0],y:407,g:"a"},
+ {t:"ดูรายงานยอดขาย",x:colX[1],y:407,g:"a"},
+ {t:"จัดการบัญชีผู้ดูแลระบบ",x:colX[0],y:476,g:"s"},
+ {t:"กำหนดสิทธิ์การเข้าถึง",x:colX[1],y:476,g:"s"},
+ {t:"ตั้งค่าระบบ",x:colX[2],y:476,g:"s"},
+];
+const pos={};UC.forEach(u=>{if(u.id)pos[u.id]=u;});
+
+function actor(cx,cy,name,sub,color){
+  const s=color||"#cfe3f5";
+  const g=el("g",{});
+  g.appendChild(el("circle",{cx,cy:cy-26,r:9,fill:"none",stroke:s,"stroke-width":2.2}));
+  g.appendChild(el("line",{x1:cx,y1:cy-17,x2:cx,y2:cy+10,stroke:s,"stroke-width":2.2}));
+  g.appendChild(el("line",{x1:cx-15,y1:cy-6,x2:cx+15,y2:cy-6,stroke:s,"stroke-width":2.2}));
+  g.appendChild(el("line",{x1:cx,y1:cy+10,x2:cx-13,y2:cy+30,stroke:s,"stroke-width":2.2}));
+  g.appendChild(el("line",{x1:cx,y1:cy+10,x2:cx+13,y2:cy+30,stroke:s,"stroke-width":2.2}));
+  svg.appendChild(g);
+  text(cx,cy+48,name,{fs:14,fw:800,fill:"#ffffff"});
+  if(sub)text(cx,cy+64,sub,{fs:10.5,fill:"#8fb0c8"});
+}
+const CUST={x:88,y:212}, PP={x:88,y:470}, ADMIN={x:992,y:340}, SADMIN={x:992,y:520};
+
+const defs=el("defs",{});
+defs.innerHTML=`<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa7b5"/></marker>`;
+svg.appendChild(defs);
+
+function link(x1,y1,x2,y2,o={}){
+  svg.appendChild(el("path",{d:`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`,
+    fill:"none",stroke:o.stroke||"#4a7fae","stroke-width":o.w||1.3,opacity:0.78}));
+}
+UC.filter(u=>u.g==="c").forEach(u=>link(CUST.x+16,CUST.y-4,u.x-PW/2,u.y,{stroke:"#3763a0"}));
+UC.filter(u=>u.g==="a").forEach(u=>link(ADMIN.x-16,ADMIN.y-4,u.x+PW/2,u.y,{stroke:"#1f7a6e"}));
+UC.filter(u=>u.g==="s").forEach(u=>link(SADMIN.x-16,SADMIN.y-4,u.x+PW/2,u.y,{stroke:"#7a52ad"}));
+link(PP.x+16,PP.y-4,pos.pay.x-PW/2,pos.pay.y,{stroke:"#c98b3a",w:1.6});
+
+// include: cart -> pay
+svg.appendChild(el("path",{d:`M ${pos.cart.x} ${pos.cart.y+PH/2} L ${pos.pay.x} ${pos.pay.y-PH/2}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.2,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
+text(pos.pay.x+44,(pos.cart.y+pos.pay.y)/2,"«include»",{fs:9,fill:"#9aa7b5"});
+
+// SuperAdmin inherits Admin
+svg.appendChild(el("path",{d:`M ${SADMIN.x} ${SADMIN.y-40} L ${ADMIN.x} ${ADMIN.y+38}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.3,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
+text(SADMIN.x-4,(SADMIN.y+ADMIN.y)/2+4,"สืบทอดสิทธิ์",{fs:9.5,fill:"#9aa7b5"});
+
+UC.forEach(u=>{
+  const c=u.g==="c"?C_BLUE:(u.g==="a"?A_TEAL:S_PURPLE);
+  svg.appendChild(el("rect",{x:u.x-PW/2,y:u.y-PH/2,width:PW,height:PH,rx:PH/2,fill:"#14304d",stroke:c,"stroke-width":1.8}));
+  text(u.x,u.y,u.t,{fs:10.5,fw:600,fill:"#eaf3fb"});
+});
+
+actor(CUST.x,CUST.y,"ลูกค้า","ผู้ซื้อ / สมาชิก");
+actor(PP.x,PP.y,"PromptPay","ระบบชำระเงิน (External)","#e0b072");
+actor(ADMIN.x,ADMIN.y,"ผู้ดูแลระบบ","Admin","#7fd8c6");
+actor(SADMIN.x,SADMIN.y,"ผู้ดูแลระบบสูงสุด","Super Admin","#c9a6ef");
+</script>
+</body>
+</html>
