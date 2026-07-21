@@ -891,3 +891,70 @@ export function clearCartApi(token: string): Promise<void> {
     headers: authHeaders(token),
   });
 }
+
+// ============================================
+// Reviews (รีวิวสินค้า)
+// ============================================
+
+export interface ApiReview {
+  id: string;
+  user_id: string;
+  product_id: string;
+  rating: number;
+  title: string | null;
+  comment: string | null;
+  author_name: string | null;
+  author_country: string | null;
+  is_verified: boolean;
+  is_translated: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewSummary {
+  average: number;
+  total: number;
+  breakdown: Record<string, number>;
+}
+
+export function getProductReviews(
+  productId: string,
+  page = 1,
+  limit = 20
+): Promise<{ data: ApiReview[]; count: number; summary: ReviewSummary }> {
+  return apiFetch<{ data: ApiReview[]; count: number; summary: ReviewSummary }>(
+    `/api/v1/reviews/product/${productId}?page=${page}&limit=${limit}`
+  );
+}
+
+export function getMyReview(
+  token: string,
+  productId: string
+): Promise<ApiReview | null> {
+  return apiFetch<ApiReview | null>(`/api/v1/reviews/me/${productId}`, {
+    headers: authHeaders(token),
+  });
+}
+
+export function createReview(
+  token: string,
+  payload: {
+    product_id: string;
+    rating: number;
+    title?: string;
+    comment?: string;
+  }
+): Promise<ApiReview> {
+  return apiFetch<ApiReview>("/api/v1/reviews", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteReview(token: string, id: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/reviews/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+}

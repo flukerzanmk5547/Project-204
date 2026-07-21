@@ -7,6 +7,14 @@ import FeedbackPanel from "@/components/FeedbackPanel";
 import Footer from "@/components/Footer";
 import FavoriteButton from "@/components/FavoriteButton";
 import { useFavorites } from "@/lib/FavoritesContext";
+import { useAuth } from "@/lib/AuthContext";
+import {
+  getProductReviews,
+  createReview,
+  deleteReview,
+  type ApiReview,
+  type ReviewSummary,
+} from "@/lib/api";
 import { useCart } from "@/lib/CartContext";
 import {
   getProductById,
@@ -36,6 +44,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addItem } = useCart();
 
+  const { token, isLoggedIn, user } = useAuth();
+  const [reviews, setReviews] = useState<ApiReview[]>([]);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummary | null>(null);
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSaving, setReviewSaving] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const [product, setProduct] = useState<ApiProduct | null>(null);
   const [related, setRelated] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +89,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       method: "POST",
       body: JSON.stringify({ product_id: id }),
     }).catch(() => {});
+  }, [id]);
+
+  // โหลดรีวิวของสินค้านี้
+  useEffect(() => {
+    getProductReviews(id)
+      .then((res) => {
+        setReviews(res.data);
+        setReviewSummary(res.summary);
+      })
+      .catch(() => {
+        setReviews([]);
+        setReviewSummary(null);
+      });
   }, [id]);
 
   useEffect(() => {
@@ -149,8 +179,51 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }));
   const colors = product.colors ?? [];
   const benefits = product.benefits ?? [];
-  const reviewCount = product.review_count ?? 0;
-  const rating = product.rating ?? 0;
+  const loadReviews = async (pid: string) => {
+    try {
+      const res = await getProductReviews(pid);
+      setReviews(res.data);
+      setReviewSummary(res.summary);
+    } catch {
+      /* ไม่มีรีวิวหรือโหลดไม่ได้ — ใช้ค่าสรุปจาก product แทน */
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!token || !product) return;
+    setReviewSaving(true);
+    setReviewError(null);
+    try {
+      await createReview(token, {
+        product_id: String(product.id),
+        rating: reviewRating,
+        title: reviewTitle || undefined,
+        comment: reviewComment || undefined,
+      });
+      setReviewFormOpen(false);
+      setReviewTitle("");
+      setReviewComment("");
+      setReviewRating(5);
+      await loadReviews(String(product.id));
+    } catch (e) {
+      setReviewError(e instanceof Error ? e.message : "บันทึกรีวิวไม่สำเร็จ");
+    } finally {
+      setReviewSaving(false);
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!token || !product) return;
+    try {
+      await deleteReview(token, id);
+      await loadReviews(String(product.id));
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const reviewCount = reviewSummary?.total ?? product.review_count ?? 0;
+  const rating = reviewSummary?.average ?? product.rating ?? 0;
   const fav = isFavorite(product.id as unknown as number);
 
   return (
@@ -476,16 +549,172 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         {/* Reviews */}
         <section className="py-8 border-t border-gray-200">
           <h2 className="text-lg font-bold text-navy mb-6">รีวิว</h2>
+
           <div className="flex flex-col md:flex-row gap-8 mb-8">
-            <div className="md:w-[220px] shrink-0">
+            {/* สรุปคะแนน */}
+            <div className="md:w-[240px] shrink-0">
               <div className="flex items-center gap-3 mb-2">
                 <div className="flex items-center gap-1">
                   <Star size={24} className="fill-amber-400 text-amber-400" />
                   <span className="text-4xl font-bold text-navy">{rating}</span>
                 </div>
-                <button className="text-xs border border-gray-300 px-3 py-1.5 rounded-full hover:bg-gray-50">เขียนรีวิว</button>
+                {isLoggedIn ? (
+                  <button
+                    onClick={() => setReviewFormOpen((v) => !v)}
+                    className="text-xs border border-gray-300 px-3 py-1.5 rounded-full hover:bg-gray-50"
+                  >
+                    {reviewFormOpen ? "ยกเลิก" : "เขียนรีวิว"}
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="text-xs border border-gray-300 px-3 py-1.5 rounded-full hover:bg-gray-50"
+                  >
+                    เข้าสู่ระบบเพื่อรีวิว
+                  </Link>
+                )}
               </div>
-              <p className="text-sm text-text-secondary">({reviewCount} รีวิว)</p>
+              <p className="text-sm text-text-secondary mb-3">({reviewCount} รีวิว)</p>
+
+              {reviewSummary && reviewSummary.total > 0 && (
+                <div className="space-y-1">
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const c = reviewSummary.breakdown[String(star)] ?? 0;
+                    const pct = reviewSummary.total
+                      ? (c / reviewSummary.total) * 100
+                      : 0;
+                    return (
+                      <div key={star} className="flex items-center gap-2">
+                        <span className="w-3 text-[11px] text-text-secondary">
+                          {star}
+                        </span>
+                        <Star
+                          size={10}
+                          className="fill-amber-400 text-amber-400 shrink-0"
+                        />
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+                          <div
+                            className="h-full rounded-full bg-amber-400"
+                            style={{ width: pct + "%" }}
+                          />
+                        </div>
+                        <span className="w-5 text-right text-[11px] text-text-secondary">
+                          {c}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ฟอร์มเขียนรีวิว + รายการรีวิว */}
+            <div className="flex-1">
+              {reviewFormOpen && (
+                <div className="mb-6 rounded-lg border border-gray-200 p-4">
+                  <p className="mb-2 text-sm font-semibold text-navy">
+                    ให้คะแนนสินค้านี้
+                  </p>
+                  <div className="mb-3 flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        aria-label={"ให้ " + star + " ดาว"}
+                      >
+                        <Star
+                          size={26}
+                          className={
+                            star <= reviewRating
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-gray-300"
+                          }
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    value={reviewTitle}
+                    onChange={(e) => setReviewTitle(e.target.value)}
+                    placeholder="หัวข้อรีวิว (ไม่บังคับ)"
+                    className="mb-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-accent"
+                  />
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="เล่าประสบการณ์การใช้งานสินค้านี้"
+                    rows={3}
+                    className="mb-2 w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-accent"
+                  />
+                  {reviewError && (
+                    <p className="mb-2 text-xs text-red-500">{reviewError}</p>
+                  )}
+                  <button
+                    onClick={handleSubmitReview}
+                    disabled={reviewSaving}
+                    className="rounded-md bg-blue-accent px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-hover disabled:bg-gray-300"
+                  >
+                    {reviewSaving ? "กำลังบันทึก..." : "ส่งรีวิว"}
+                  </button>
+                </div>
+              )}
+
+              {reviews.length === 0 ? (
+                <p className="py-8 text-center text-sm text-text-secondary">
+                  ยังไม่มีรีวิวสำหรับสินค้านี้ — เป็นคนแรกที่รีวิวได้เลย
+                </p>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {reviews.map((rv) => (
+                    <div key={rv.id} className="py-4">
+                      <div className="mb-1 flex items-center gap-2">
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={13}
+                              className={
+                                star <= rv.rating
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-gray-300"
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm font-semibold text-navy">
+                          {rv.author_name || "ผู้ใช้"}
+                        </span>
+                        {rv.is_verified && (
+                          <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-700">
+                            ซื้อจริง
+                          </span>
+                        )}
+                        <span className="text-xs text-text-secondary">
+                          {new Date(rv.created_at).toLocaleDateString("th-TH")}
+                        </span>
+                        {user?.id === rv.user_id && (
+                          <button
+                            onClick={() => handleDeleteReview(rv.id)}
+                            className="ml-auto text-xs text-red-500 hover:underline"
+                          >
+                            ลบ
+                          </button>
+                        )}
+                      </div>
+                      {rv.title && (
+                        <p className="text-sm font-semibold text-text-primary">
+                          {rv.title}
+                        </p>
+                      )}
+                      {rv.comment && (
+                        <p className="text-sm leading-relaxed text-text-secondary">
+                          {rv.comment}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>

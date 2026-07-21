@@ -3,6 +3,8 @@ import { Server } from "./config/Server.js";
 import { Database } from "./config/Database.js";
 import { Environment } from "./config/Environment.js";
 import { CorsPlugin } from "./plugins/CorsPlugin.js";
+import { SecurityPlugin } from "./plugins/SecurityPlugin.js";
+import { RateLimitPlugin } from "./plugins/RateLimitPlugin.js";
 import { ErrorHandler } from "./plugins/ErrorHandler.js";
 import { ProductRoutes } from "./modules/product/ProductRoutes.js";
 import { CategoryRoutes } from "./modules/category/CategoryRoutes.js";
@@ -22,6 +24,7 @@ import { DashboardRoutes } from "./modules/dashboard/DashboardRoutes.js";
 import { SuperAdminRoutes } from "./modules/superadmin/SuperAdminRoutes.js";
 import { FavoriteRoutes } from "./modules/favorite/FavoriteRoutes.js";
 import { AnalyticsRoutes } from "./modules/analytics/AnalyticsRoutes.js";
+import { ReviewRoutes } from "./modules/review/ReviewRoutes.js";
 import { getLineBotInstance } from "./modules/payment/LineBotService.js";
 
 export class Application {
@@ -34,6 +37,8 @@ export class Application {
   }
 
   private async registerPlugins(): Promise<void> {
+    await SecurityPlugin.register(this.app);
+    await RateLimitPlugin.register(this.app);
     await CorsPlugin.register(this.app);
     ErrorHandler.register(this.app);
 
@@ -96,6 +101,7 @@ export class Application {
     new SuperAdminRoutes().register(this.app);
     new FavoriteRoutes().register(this.app);
     new AnalyticsRoutes().register(this.app);
+    new ReviewRoutes().register(this.app);
   }
 
   public async start(): Promise<void> {
