@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Star, Trash2, ShoppingCart, Loader2 } from "lucide-react";
+import { Star, Trash2, ShoppingCart, Loader2, Check, X } from "lucide-react";
 import { Icon } from "@iconify/react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,6 +18,7 @@ export default function FavoritesPage() {
   const { addItem } = useCart();
 
   const [apiItems, setApiItems] = useState<ApiFavorite[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -78,7 +79,15 @@ export default function FavoritesPage() {
       size: "-",
       quantity: 1,
     });
+    setToast(item.name);
   };
+
+  // ซ่อน toast อัตโนมัติหลัง 2.5 วินาที
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 2500);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -238,6 +247,36 @@ export default function FavoritesPage() {
           </div>
         )}
       </main>
+
+      {/* Toast แจ้งเตือนเมื่อเพิ่มลงตะกร้า */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-[60] flex max-w-sm items-start gap-3 rounded-lg bg-navy px-4 py-3 text-white shadow-xl animate-[fadeIn_0.2s_ease-out]"
+        >
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-500">
+            <Check size={13} strokeWidth={3} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">เพิ่มลงตะกร้าแล้ว</p>
+            <p className="truncate text-xs text-white/70">{toast}</p>
+            <Link
+              href="/cart"
+              className="mt-1 inline-block text-xs font-semibold text-blue-300 underline hover:text-blue-200"
+            >
+              ดูตะกร้า
+            </Link>
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            aria-label="ปิด"
+            className="shrink-0 text-white/50 transition hover:text-white"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       <Footer />
       <FeedbackPanel />

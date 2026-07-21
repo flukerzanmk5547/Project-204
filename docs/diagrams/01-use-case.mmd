@@ -1,9 +1,9 @@
 flowchart LR
     Guest(["ผู้ใช้ทั่วไป"])
-    Member(["สมาชิก (Customer)"])
-    Emp(["พนักงาน (Employee)"])
-    Admin(["ผู้ดูแลระบบ (Admin)"])
-    SAdmin(["ผู้ดูแลระบบสูงสุด (Super Admin)"])
+    Member(["สมาชิก (customer)"])
+    Reseller(["ตัวแทนจำหน่าย (reseller)"])
+    Manager(["ผู้จัดการ (manager)"])
+    SAdmin(["ผู้ดูแลระบบสูงสุด (superadmin)"])
     PP(["PromptPay"])
 
     subgraph SYS["ระบบ Sport Store"]
@@ -18,24 +18,32 @@ flowchart LR
         UC9["ชำระเงิน PromptPay"]
         UC10["ดูประวัติคำสั่งซื้อ"]
         UC11["เขียนรีวิวสินค้า"]
-        UC12["ตรวจสอบคำสั่งซื้อ"]
-        UC13["อัปเดตสถานะคำสั่งซื้อ"]
-        UC14["จัดการสต็อกสินค้า"]
-        UC15["จัดการสินค้า / หมวดหมู่"]
-        UC16["จัดการแบนเนอร์ / โปรโมชัน"]
-        UC17["จัดการหน้าแรก / ชุดสินค้า"]
-        UC18["ดูรายงานยอดขาย"]
-        UC19["จัดการบัญชีผู้ดูแลระบบ"]
-        UC20["กำหนดสิทธิ์การเข้าถึง"]
-        UC21["ตั้งค่าระบบ"]
-        UC22["ให้คะแนนความพึงพอใจ (Feedback)"]
+        UC12["ให้คะแนนความพึงพอใจ"]
+
+        UC13["จัดการสินค้า / สต็อก"]
+        UC14["จัดการโปรโมชัน / ชุดสินค้า"]
+        UC15["จัดการคุณลักษณะสินค้า"]
+        UC16["จัดการคำสั่งซื้อ / สถานะ"]
+        UC17["ตรวจสอบการชำระเงิน"]
+        UC18["ดูแดชบอร์ด / วิเคราะห์ยอดขาย"]
+        UC19["จัดการการแจ้งเตือน"]
+
+        UC20["จัดการหมวดหมู่สินค้า"]
+        UC21["จัดการแบนเนอร์ / หน้าแรก"]
+        UC22["จัดการบัญชีผู้ใช้"]
+        UC23["จัดการบัญชีรับเงิน"]
+
+        UC24["จัดการพนักงาน (Staff)"]
+        UC25["กำหนดสิทธิ์ (role)"]
+        UC26["เปิด / ปิดการใช้งานบัญชี"]
+        UC27["ดูสถิติระบบ"]
     end
 
     Guest --- UC1
     Guest --- UC2
     Guest --- UC3
     Guest --- UC4
-    Guest --- UC22
+    Guest --- UC12
     Member --- UC5
     Member --- UC6
     Member --- UC7
@@ -47,16 +55,23 @@ flowchart LR
     UC9 -. include .-> UC10
     UC9 --- PP
 
-    Emp --- UC12
-    Emp --- UC13
-    Emp --- UC14
-    Admin --- UC15
-    Admin --- UC16
-    Admin --- UC17
-    Admin --- UC18
-    SAdmin --- UC19
-    SAdmin --- UC20
-    SAdmin --- UC21
+    Reseller --- UC13
+    Reseller --- UC14
+    Reseller --- UC15
+    Reseller --- UC16
+    Reseller --- UC17
+    Reseller --- UC18
+    Reseller --- UC19
 
-    Admin -. สืบทอดสิทธิ์ .-> Emp
-    SAdmin -. สืบทอดสิทธิ์ .-> Admin
+    Manager --- UC20
+    Manager --- UC21
+    Manager --- UC22
+    Manager --- UC23
+
+    SAdmin --- UC24
+    SAdmin --- UC25
+    SAdmin --- UC26
+    SAdmin --- UC27
+
+    Manager -. สืบทอดสิทธิ์ .-> Reseller
+    SAdmin -. สืบทอดสิทธิ์ .-> Manager

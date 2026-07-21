@@ -8,51 +8,56 @@
 </style>
 </head>
 <body>
-<svg id="d" width="1120" height="730" viewBox="0 0 1120 730" xmlns="http://www.w3.org/2000/svg"></svg>
+<svg id="d" width="1180" height="820" viewBox="0 0 1180 820" xmlns="http://www.w3.org/2000/svg"></svg>
 <script>
 const NS="http://www.w3.org/2000/svg";
 const svg=document.getElementById("d");
 function el(n,a){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;}
 function text(x,y,s,o={}){const t=el("text",Object.assign({x,y,"text-anchor":"middle","dominant-baseline":"middle",fill:o.fill||"#eaf3fb","font-size":o.fs||11,"font-weight":o.fw||400},o.attr||{}));t.textContent=s;svg.appendChild(t);return t;}
 
-svg.appendChild(el("rect",{x:0,y:0,width:1120,height:730,fill:"#0c1a2b"}));
-text(560,36,"แผนภาพ Use Case — ระบบ Sport Store",{fs:24,fw:800,fill:"#ffffff"});
-text(560,62,"บทบาทผู้ใช้ 4 ระดับ: ลูกค้า · พนักงาน · ผู้ดูแลระบบ · ผู้ดูแลระบบสูงสุด (+ PromptPay)",{fs:12.5,fill:"#8fb0c8"});
+svg.appendChild(el("rect",{x:0,y:0,width:1180,height:820,fill:"#0c1a2b"}));
+text(590,34,"แผนภาพ Use Case — ระบบ Sport Store",{fs:24,fw:800,fill:"#ffffff"});
+text(590,60,"บทบาทผู้ใช้ 4 ระดับ: customer · reseller · manager · superadmin (+ PromptPay)",{fs:12.5,fill:"#8fb0c8"});
 
-svg.appendChild(el("rect",{x:300,y:96,width:520,height:492,rx:16,fill:"#0f2237",stroke:"#2f5a7d","stroke-width":1.5}));
-text(560,118,"ระบบ Sport Store",{fs:14,fw:700,fill:"#46b6d9"});
-[332,394,510].forEach(y=>svg.appendChild(el("line",{x1:318,y1:y,x2:802,y2:y,stroke:"#274a68","stroke-width":1.1,"stroke-dasharray":"5 5"})));
+svg.appendChild(el("rect",{x:300,y:92,width:560,height:606,rx:16,fill:"#0f2237",stroke:"#2f5a7d","stroke-width":1.5}));
+text(580,114,"ระบบ Sport Store",{fs:14,fw:700,fill:"#46b6d9"});
+[330,528,632].forEach(y=>svg.appendChild(el("line",{x1:318,y1:y,x2:842,y2:y,stroke:"#274a68","stroke-width":1.1,"stroke-dasharray":"5 5"})));
 
-const colX=[392,560,728];
-const PW=152,PH=34;
-const C_BLUE="#3d7bf7", E_AMBER="#e0a03c", A_TEAL="#28b295", S_PURPLE="#a06be0";
+const colX=[404,580,756];
+const PW=164,PH=32;
+const C_BLUE="#3d7bf7", R_AMBER="#e0a03c", M_TEAL="#28b295", S_PURPLE="#a06be0";
 
 const UC=[
- {t:"ดู / ค้นหาสินค้า",x:colX[0],y:150,g:"c"},
- {t:"ดูรายละเอียดสินค้า",x:colX[1],y:150,g:"c"},
- {t:"สมัครสมาชิก",x:colX[2],y:150,g:"c"},
- {t:"เข้าสู่ระบบ",x:colX[0],y:198,g:"c"},
- {t:"จัดการตะกร้า",x:colX[1],y:198,g:"c",id:"cart"},
- {t:"จัดการสินค้าโปรด",x:colX[2],y:198,g:"c"},
- {t:"จัดการที่อยู่จัดส่ง",x:colX[0],y:246,g:"c"},
- {t:"สั่งซื้อ (Checkout)",x:colX[1],y:246,g:"c",id:"co"},
- {t:"ชำระเงิน PromptPay",x:colX[2],y:246,g:"c",id:"pay"},
- {t:"ดูประวัติคำสั่งซื้อ",x:colX[0],y:294,g:"c"},
- {t:"เขียนรีวิวสินค้า",x:colX[1],y:294,g:"c"},
- {t:"ให้คะแนนความพึงพอใจ",x:colX[2],y:294,g:"c"},
+ {t:"ดู / ค้นหาสินค้า",x:colX[0],y:146,g:"c"},
+ {t:"ดูรายละเอียดสินค้า",x:colX[1],y:146,g:"c"},
+ {t:"สมัครสมาชิก",x:colX[2],y:146,g:"c"},
+ {t:"เข้าสู่ระบบ",x:colX[0],y:190,g:"c"},
+ {t:"จัดการตะกร้า",x:colX[1],y:190,g:"c"},
+ {t:"จัดการสินค้าโปรด",x:colX[2],y:190,g:"c"},
+ {t:"จัดการที่อยู่จัดส่ง",x:colX[0],y:234,g:"c"},
+ {t:"สั่งซื้อ (Checkout)",x:colX[1],y:234,g:"c",id:"co"},
+ {t:"ชำระเงิน PromptPay",x:colX[2],y:234,g:"c",id:"pay"},
+ {t:"ดูประวัติคำสั่งซื้อ",x:colX[0],y:278,g:"c"},
+ {t:"เขียนรีวิวสินค้า",x:colX[1],y:278,g:"c"},
+ {t:"ให้คะแนนความพึงพอใจ",x:colX[2],y:278,g:"c"},
 
- {t:"ตรวจสอบคำสั่งซื้อ",x:colX[0],y:362,g:"e"},
- {t:"อัปเดตสถานะคำสั่งซื้อ",x:colX[1],y:362,g:"e"},
- {t:"จัดการสต็อกสินค้า",x:colX[2],y:362,g:"e"},
+ {t:"จัดการสินค้า / สต็อก",x:colX[0],y:360,g:"r"},
+ {t:"โปรโมชัน / ชุดสินค้า",x:colX[1],y:360,g:"r"},
+ {t:"คุณลักษณะสินค้า",x:colX[2],y:360,g:"r"},
+ {t:"จัดการคำสั่งซื้อ",x:colX[0],y:404,g:"r"},
+ {t:"ตรวจสอบการชำระเงิน",x:colX[1],y:404,g:"r"},
+ {t:"แดชบอร์ด / วิเคราะห์",x:colX[2],y:404,g:"r"},
+ {t:"จัดการการแจ้งเตือน",x:colX[0],y:448,g:"r"},
 
- {t:"จัดการสินค้า / หมวดหมู่",x:colX[0],y:424,g:"a"},
- {t:"แบนเนอร์ / โปรโมชัน",x:colX[1],y:424,g:"a"},
- {t:"หน้าแรก / ชุดสินค้า",x:colX[2],y:424,g:"a"},
- {t:"ดูรายงานยอดขาย",x:colX[0],y:472,g:"a"},
+ {t:"จัดการหมวดหมู่",x:colX[0],y:556,g:"m"},
+ {t:"แบนเนอร์ / หน้าแรก",x:colX[1],y:556,g:"m"},
+ {t:"จัดการบัญชีผู้ใช้",x:colX[2],y:556,g:"m"},
+ {t:"จัดการบัญชีรับเงิน",x:colX[0],y:596,g:"m"},
 
- {t:"จัดการบัญชีผู้ดูแลระบบ",x:colX[0],y:544,g:"s"},
- {t:"กำหนดสิทธิ์การเข้าถึง",x:colX[1],y:544,g:"s"},
- {t:"ตั้งค่าระบบ",x:colX[2],y:544,g:"s"},
+ {t:"จัดการพนักงาน (Staff)",x:colX[0],y:660,g:"s"},
+ {t:"กำหนดสิทธิ์ (role)",x:colX[1],y:660,g:"s"},
+ {t:"เปิด / ปิดบัญชี",x:colX[2],y:660,g:"s"},
+ {t:"ดูสถิติระบบ",x:colX[0],y:700,g:"s"},
 ];
 const pos={};UC.forEach(u=>{if(u.id)pos[u.id]=u;});
 
@@ -68,7 +73,7 @@ function actor(cx,cy,name,sub,color){
   text(cx,cy+44,name,{fs:13,fw:800,fill:"#ffffff"});
   if(sub)text(cx,cy+59,sub,{fs:10,fill:"#8fb0c8"});
 }
-const CUST={x:100,y:210}, PP={x:100,y:440}, EMP={x:1015,y:352}, ADMIN={x:1015,y:462}, SADMIN={x:1015,y:590};
+const CUST={x:104,y:200}, PP={x:104,y:420}, RES={x:1074,y:392}, MAN={x:1074,y:566}, SAD={x:1074,y:700};
 
 const defs=el("defs",{});
 defs.innerHTML=`<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa7b5"/></marker>`;
@@ -76,34 +81,33 @@ svg.appendChild(defs);
 
 function link(x1,y1,x2,y2,o={}){
   svg.appendChild(el("path",{d:`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`,
-    fill:"none",stroke:o.stroke||"#4a7fae","stroke-width":o.w||1.25,opacity:0.75}));
+    fill:"none",stroke:o.stroke||"#4a7fae","stroke-width":o.w||1.2,opacity:0.72}));
 }
 UC.filter(u=>u.g==="c").forEach(u=>link(CUST.x+15,CUST.y-4,u.x-PW/2,u.y,{stroke:"#3763a0"}));
-UC.filter(u=>u.g==="e").forEach(u=>link(EMP.x-15,EMP.y-4,u.x+PW/2,u.y,{stroke:"#a8762a"}));
-UC.filter(u=>u.g==="a").forEach(u=>link(ADMIN.x-15,ADMIN.y-4,u.x+PW/2,u.y,{stroke:"#1f7a6e"}));
-UC.filter(u=>u.g==="s").forEach(u=>link(SADMIN.x-15,SADMIN.y-4,u.x+PW/2,u.y,{stroke:"#7a52ad"}));
+UC.filter(u=>u.g==="r").forEach(u=>link(RES.x-15,RES.y-4,u.x+PW/2,u.y,{stroke:"#a8762a"}));
+UC.filter(u=>u.g==="m").forEach(u=>link(MAN.x-15,MAN.y-4,u.x+PW/2,u.y,{stroke:"#1f7a6e"}));
+UC.filter(u=>u.g==="s").forEach(u=>link(SAD.x-15,SAD.y-4,u.x+PW/2,u.y,{stroke:"#7a52ad"}));
 link(PP.x+15,PP.y-4,pos.pay.x-PW/2,pos.pay.y,{stroke:"#c98b3a",w:1.5});
 
 svg.appendChild(el("path",{d:`M ${pos.co.x+PW/2} ${pos.co.y} L ${pos.pay.x-PW/2} ${pos.pay.y}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.1,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
-text((pos.co.x+pos.pay.x)/2,pos.co.y-12,"«include»",{fs:8.5,fill:"#9aa7b5"});
+text((pos.co.x+pos.pay.x)/2,pos.co.y-11,"«include»",{fs:8.5,fill:"#9aa7b5"});
 
-// inheritance chain
-svg.appendChild(el("path",{d:`M ${ADMIN.x} ${ADMIN.y-34} L ${EMP.x} ${EMP.y+34}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.2,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
-svg.appendChild(el("path",{d:`M ${SADMIN.x} ${SADMIN.y-34} L ${ADMIN.x} ${ADMIN.y+34}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.2,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
-text(SADMIN.x-56,(SADMIN.y+ADMIN.y)/2+16,"สืบทอดสิทธิ์",{fs:9,fill:"#9aa7b5"});
-text(EMP.x-56,(ADMIN.y+EMP.y)/2+16,"สืบทอดสิทธิ์",{fs:9,fill:"#9aa7b5"});
+svg.appendChild(el("path",{d:`M ${MAN.x} ${MAN.y-34} L ${RES.x} ${RES.y+34}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.2,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
+svg.appendChild(el("path",{d:`M ${SAD.x} ${SAD.y-34} L ${MAN.x} ${MAN.y+34}`,fill:"none",stroke:"#9aa7b5","stroke-width":1.2,"stroke-dasharray":"5 4","marker-end":"url(#ar)"}));
+text(RES.x-52,(MAN.y+RES.y)/2+14,"สืบทอดสิทธิ์",{fs:9,fill:"#9aa7b5"});
+text(MAN.x-52,(SAD.y+MAN.y)/2+14,"สืบทอดสิทธิ์",{fs:9,fill:"#9aa7b5"});
 
 UC.forEach(u=>{
-  const c=u.g==="c"?C_BLUE:(u.g==="e"?E_AMBER:(u.g==="a"?A_TEAL:S_PURPLE));
+  const c=u.g==="c"?C_BLUE:(u.g==="r"?R_AMBER:(u.g==="m"?M_TEAL:S_PURPLE));
   svg.appendChild(el("rect",{x:u.x-PW/2,y:u.y-PH/2,width:PW,height:PH,rx:PH/2,fill:"#14304d",stroke:c,"stroke-width":1.7}));
   text(u.x,u.y,u.t,{fs:10,fw:600,fill:"#eaf3fb"});
 });
 
-actor(CUST.x,CUST.y,"ลูกค้า","Customer / Guest");
+actor(CUST.x,CUST.y,"ลูกค้า","customer");
 actor(PP.x,PP.y,"PromptPay","ระบบชำระเงิน (External)","#e0b072");
-actor(EMP.x,EMP.y,"พนักงาน","Employee","#f0c583");
-actor(ADMIN.x,ADMIN.y,"ผู้ดูแลระบบ","Admin","#7fd8c6");
-actor(SADMIN.x,SADMIN.y,"ผู้ดูแลระบบสูงสุด","Super Admin","#c9a6ef");
+actor(RES.x,RES.y,"ตัวแทนจำหน่าย","reseller","#f0c583");
+actor(MAN.x,MAN.y,"ผู้จัดการ","manager","#7fd8c6");
+actor(SAD.x,SAD.y,"ผู้ดูแลระบบสูงสุด","superadmin","#c9a6ef");
 </script>
 </body>
 </html>

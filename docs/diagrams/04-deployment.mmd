@@ -1,14 +1,24 @@
 flowchart TB
     User(["ผู้ใช้ (Browser)"])
-    subgraph SERVER["เซิร์ฟเวอร์ — Docker Compose"]
-        Nginx["Nginx<br/>(Reverse Proxy / SSL)"]
-        FE["Frontend Container<br/>Next.js"]
-        BE["Backend Container<br/>Fastify API"]
+
+    subgraph AWS["AWS Cloud"]
+        subgraph EC2["Amazon EC2 Instance"]
+            Nginx["Nginx<br/>(Reverse Proxy / SSL)"]
+            subgraph DOCKER["Docker"]
+                FE["Frontend Container<br/>Next.js : 3000"]
+                BE["Backend Container<br/>Fastify API : 4000"]
+            end
+        end
     end
-    DB[("Supabase<br/>PostgreSQL")]
+
+    SB[("Supabase<br/>PostgreSQL + Auth")]
+    PP["PromptPay<br/>(ระบบชำระเงิน)"]
+    LINE["LINE Messaging API<br/>(แจ้งเตือน / อ่านสลิป)"]
 
     User -->|HTTPS| Nginx
     Nginx -->|route /| FE
     Nginx -->|route /api| BE
     FE -->|เรียก API| BE
-    BE -->|query ข้อมูล| DB
+    BE -->|supabase-js| SB
+    BE -.ชำระเงิน.-> PP
+    BE -.แจ้งเตือน.-> LINE

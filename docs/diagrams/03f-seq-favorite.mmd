@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    actor C as ลูกค้า
+    participant FE as Frontend (Next.js)
+    participant CTX as FavoritesContext
+    participant BE as Backend (Fastify)
+    participant SB as Supabase Auth
+    participant DB as PostgreSQL
+
+    Note over C,DB: Flow 6 — จัดการสินค้าโปรด (Favorites)
+
+    C->>FE: กดรูปหัวใจที่สินค้า
+    FE->>CTX: toggleFavorite()
+    CTX->>CTX: บันทึกลง localStorage (กรณียังไม่ล็อกอิน)
+
+    alt ล็อกอินแล้ว
+        FE->>BE: POST /api/v1/favorites (Bearer token)
+        BE->>SB: ตรวจสอบ token
+        SB-->>BE: user
+        BE->>DB: insert user_favorites
+        DB-->>BE: ok
+        BE-->>FE: สำเร็จ
+    end
+
+    C->>FE: เข้าหน้า /favorites
+    FE->>BE: GET /api/v1/favorites
+    BE->>DB: query user_favorites + products
+    DB-->>BE: รายการสินค้าโปรด
+    BE-->>FE: favorites
+    FE-->>C: แสดงรายการสินค้าโปรด
+
+    C->>FE: กด "ใส่ตะกร้า"
+    FE->>BE: POST /api/v1/cart
+    BE->>DB: insert cart_items
+    DB-->>BE: ok
+    FE-->>C: แสดง toast "เพิ่มลงตะกร้าแล้ว"

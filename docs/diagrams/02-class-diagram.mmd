@@ -8,6 +8,7 @@ classDiagram
         +string phone
         +string avatar_url
         +string role
+        +bool is_active
         +register()
         +login()
         +logout()
@@ -24,24 +25,30 @@ classDiagram
         +viewOrderHistory()
         +writeReview()
     }
-    class Employee {
-        +viewOrders()
-        +updateOrderStatus()
-        +adjustStock()
-    }
-    class Admin {
+    class Reseller {
         +manageProduct()
-        +manageCategory()
-        +manageBanner()
+        +adjustStock()
         +managePromotion()
         +manageBundle()
+        +manageAttribute()
+        +manageOrder()
+        +verifyPayment()
+        +viewDashboard()
+        +viewAnalytics()
+        +manageNotification()
+    }
+    class Manager {
+        +manageCategory()
+        +manageBanner()
         +manageHomepage()
-        +viewSalesReport()
+        +manageUserAccount()
+        +managePaymentAccount()
     }
     class SuperAdmin {
-        +manageAdminAccount()
-        +assignPermission()
-        +configureSystem()
+        +createStaff()
+        +assignRole()
+        +setUserActive()
+        +viewSystemStats()
     }
 
     class Category {
@@ -297,6 +304,38 @@ classDiagram
         +updateConfig()
         +deleteConfig()
     }
+    class PaymentAccount {
+        +uuid id
+        +string bank
+        +string account_no
+        +string promptpay_number
+        +bool is_active
+        +getAccounts()
+        +createAccount()
+        +updateAccount()
+        +deleteAccount()
+    }
+    class Notification {
+        +uuid id
+        +uuid user_id
+        +string type
+        +string message
+        +bool is_read
+        +getNotifications()
+        +createNotification()
+        +markAsRead()
+        +remove()
+    }
+    class Dashboard {
+        +getSummary()
+        +getSalesOverview()
+        +getTopProducts()
+    }
+    class Analytics {
+        +getFull()
+        +getBehavior()
+        +getSalesByPeriod()
+    }
     class Feedback {
         +int rating
         +string purpose
@@ -305,9 +344,9 @@ classDiagram
     }
 
     User <|-- Customer
-    User <|-- Employee
-    Employee <|-- Admin
-    Admin <|-- SuperAdmin
+    User <|-- Reseller
+    Reseller <|-- Manager
+    Manager <|-- SuperAdmin
 
     Customer "1" --> "*" Address
     Customer "1" --> "*" Order
@@ -334,6 +373,8 @@ classDiagram
     Cart "1" --> "*" CartItem
     Order "1" --> "*" OrderItem
     Order "1" --> "1" Payment
+    Payment "*" --> "1" PaymentAccount
+    User "1" --> "*" Notification
 
     HomepageSection "1" --> "*" Product
     Recommendation ..> Product : แนะนำ
