@@ -43,6 +43,29 @@ export class AuthRoutes {
           { preHandler: [AuthPlugin.authenticate] },
           this.controller.updateProfile.bind(this.controller)
         );
+        router.patch(
+          "/profile/password",
+          { preHandler: [AuthPlugin.authenticate] },
+          this.controller.changePassword.bind(this.controller)
+        );
+        router.patch(
+          "/profile/email",
+          { preHandler: [AuthPlugin.authenticate] },
+          this.controller.changeEmail.bind(this.controller)
+        );
+
+        // Manager-only routes
+        const manager = AuthPlugin.requireRole("manager");
+        router.get(
+          "/users",
+          { preHandler: [manager] },
+          this.controller.listUsers.bind(this.controller)
+        );
+        router.patch(
+          "/users/:id/role",
+          { preHandler: [manager] },
+          this.controller.changeRole.bind(this.controller)
+        );
       },
       { prefix: "/api/v1/auth" }
     );

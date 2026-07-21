@@ -58,7 +58,7 @@ export class CategoryService extends BaseService<Category> {
       this.categoryRepo.findChildren(category.id),
     ]);
 
-    const products = await this.getCategoryProducts(category.id, children.length === 0);
+    const products = await this.getCategoryProducts(category);
 
     const breadcrumb: BreadcrumbItem[] = [
       ...ancestors.map((a) => ({
@@ -76,34 +76,31 @@ export class CategoryService extends BaseService<Category> {
     return { category, breadcrumb, children, products };
   }
 
-  private async getCategoryProducts(
-    categoryId: string,
-    isLeaf: boolean
-  ): Promise<unknown[]> {
-    const db = Database.getInstance().getClient();
+  private async getCategoryProducts(category: Category): Promise<unknown[]> {
+    const db = Database.getInstance().getAdminClient();
 
-    if (isLeaf) {
-      const { data } = await db
-        .from("products")
-        .select("*")
-        .eq("category_id", categoryId)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-      return data ?? [];
-    }
-
-    const allChildren = await this.getAllDescendantIds(categoryId);
-    allChildren.push(categoryId);
+    // รวมสินค้าของหมวดนี้ + หมวดย่อยทั้งหมด (subtree)
+    const ids = await this.getAllDescendantIds(category.id);
+    ids.push(category.id);
 
     const { data } = await db
       .from("products")
       .select("*")
-      .in("category_id", allChildren)
+      .in("category_id", ids)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(60);
 
-    return data ?? [];
+    const products = data ?? [];
+
+    // ถ้าหมวดนี้ (และหมวดย่อย) ไม่มีสินค้า ให้ดึงจากหมวดแม่ขึ้นไปแทน
+    // กันไม่ให้หน้า leaf ที่ไม่มีสินค้าตรงๆ ขึ้นว่าง
+    if (products.length === 0 && category.parent_id) {
+      const parent = await this.categoryRepo.findById(category.parent_id);
+      if (parent) return this.getCategoryProducts(parent);
+    }
+
+    return products;
   }
 
   private async getAllDescendantIds(parentId: string): Promise<string[]> {

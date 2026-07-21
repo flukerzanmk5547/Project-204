@@ -11,7 +11,7 @@ export class AttributeRepository {
   private readonly db: SupabaseClient;
 
   constructor() {
-    this.db = Database.getInstance().getClient();
+    this.db = Database.getInstance().getAdminClient();
   }
 
   // ---- Attribute Groups ----

@@ -21,21 +21,10 @@ export class CategoryRoutes {
           this.controller.getChildren.bind(this.controller)
         );
 
-        router.post(
-          "/",
-          { preHandler: [AuthPlugin.authenticate] },
-          this.controller.create.bind(this.controller)
-        );
-        router.put(
-          "/:id",
-          { preHandler: [AuthPlugin.authenticate] },
-          this.controller.update.bind(this.controller)
-        );
-        router.delete(
-          "/:id",
-          { preHandler: [AuthPlugin.authenticate] },
-          this.controller.delete.bind(this.controller)
-        );
+        const manager = AuthPlugin.requireRole("manager");
+        router.post("/", { preHandler: [manager] }, this.controller.create.bind(this.controller));
+        router.put("/:id", { preHandler: [manager] }, this.controller.update.bind(this.controller));
+        router.delete("/:id", { preHandler: [manager] }, this.controller.delete.bind(this.controller));
       },
       { prefix: "/api/v1/categories" }
     );

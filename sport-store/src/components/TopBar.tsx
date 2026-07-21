@@ -1,18 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   Search,
   User,
-  Heart,
-  ShoppingCart,
-  MapPin,
   ChevronDown,
   Menu,
   X,
   LogOut,
-  Package,
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import MobileDrawer from "./MobileDrawer";
@@ -65,22 +63,14 @@ export default function TopBar() {
           {/* Logo + Language */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-1">
-              <svg
-                viewBox="0 0 200 30"
-                className="h-6 w-auto fill-white"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <text
-                  x="0"
-                  y="24"
-                  fontFamily="Arial Black, sans-serif"
-                  fontSize="22"
-                  fontWeight="900"
-                  letterSpacing="2"
-                >
-                  SPORTGEAR
-                </text>
-              </svg>
+              <Image
+                src="/sportgear-logo.png"
+                alt="SportGear"
+                width={1514}
+                height={300}
+                priority
+                className="h-7 w-auto object-contain"
+              />
             </Link>
             <button className="flex items-center gap-1 text-sm border border-white/30 rounded px-2 py-1 hover:bg-white/10 transition-colors">
               <span>TH</span>
@@ -147,34 +137,34 @@ export default function TopBar() {
                       </div>
                       <Link
                         href="/account"
-                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        <User size={16} />
+                        <Icon icon="fluent-emoji:bust-in-silhouette" width={20} height={20} />
                         บัญชีของฉัน
                       </Link>
                       <Link
-                        href="/account/orders"
-                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        href="/account/profile"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        <Package size={16} />
-                        คำสั่งซื้อของฉัน
+                        <Icon icon="fluent-emoji:gear" width={20} height={20} />
+                        แก้ไขข้อมูลส่วนตัว
                       </Link>
                       <Link
                         href="/cart"
-                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        <ShoppingCart size={16} />
+                        <Icon icon="fluent-emoji:shopping-cart" width={20} height={20} />
                         ตะกร้าของฉัน
                       </Link>
                       <Link
                         href="/favorites"
-                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        <Heart size={16} />
+                        <Icon icon="fluent-emoji:red-heart" width={20} height={20} />
                         สินค้าโปรด
                       </Link>
                       <button
@@ -182,9 +172,9 @@ export default function TopBar() {
                           logout();
                           setUserMenuOpen(false);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition-colors w-full text-left text-red-600"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-gray-50 transition-colors w-full text-left text-red-600"
                       >
-                        <LogOut size={16} />
+                        <LogOut size={18} />
                         ออกจากระบบ
                       </button>
                     </div>
@@ -201,16 +191,16 @@ export default function TopBar() {
               </Link>
             )}
             <Link href="/favorites" className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group relative">
-              <Heart size={20} className="group-hover:scale-110 transition-transform" />
+              <Icon icon="fluent-emoji:red-heart" width={22} height={22} className="group-hover:scale-110 transition-transform" />
               <span className="text-[10px] mt-0.5 hidden lg:block">สินค้าโปรด</span>
               {favCount > 0 && (
-                <span className="absolute top-0 right-1 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute top-0 right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {favCount > 99 ? "99+" : favCount}
                 </span>
               )}
             </Link>
             <Link href="/cart" className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group relative">
-              <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
+              <Icon icon="fluent-emoji:shopping-cart" width={22} height={22} className="group-hover:scale-110 transition-transform" />
               <span className="text-[10px] mt-0.5 hidden lg:block">ตะกร้า</span>
               {totalItems > 0 && (
                 <span className="absolute top-0 right-1 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
@@ -219,7 +209,7 @@ export default function TopBar() {
               )}
             </Link>
             <button className="flex flex-col items-center justify-center px-3 py-1 hover:bg-white/10 rounded transition-colors group">
-              <MapPin size={20} className="group-hover:scale-110 transition-transform" />
+              <Icon icon="fluent-emoji:department-store" width={22} height={22} className="group-hover:scale-110 transition-transform" />
               <span className="text-[10px] mt-0.5 hidden lg:block">หาร้านค้า</span>
             </button>
           </div>
@@ -236,22 +226,14 @@ export default function TopBar() {
               <Menu size={24} />
             </button>
             <Link href="/" className="flex items-center">
-              <svg
-                viewBox="0 0 200 30"
-                className="h-5 w-auto fill-white"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <text
-                  x="0"
-                  y="24"
-                  fontFamily="Arial Black, sans-serif"
-                  fontSize="22"
-                  fontWeight="900"
-                  letterSpacing="2"
-                >
-                  SPORTGEAR
-                </text>
-              </svg>
+              <Image
+                src="/sportgear-logo.png"
+                alt="SportGear"
+                width={1514}
+                height={300}
+                priority
+                className="h-6 w-auto object-contain"
+              />
             </Link>
           </div>
 
@@ -269,7 +251,7 @@ export default function TopBar() {
             </button>
             {isLoggedIn ? (
               <Link
-                href="/account"
+                href="#"
                 className="p-2 hover:bg-white/10 rounded transition-colors"
                 aria-label="บัญชี"
               >
@@ -286,8 +268,16 @@ export default function TopBar() {
                 <User size={22} />
               </Link>
             )}
+            <Link href="/favorites" className="p-2 hover:bg-white/10 rounded transition-colors relative" aria-label="สินค้าโปรด">
+              <Icon icon="fluent-emoji:red-heart" width={22} height={22} />
+              {favCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              )}
+            </Link>
             <Link href="/cart" className="p-2 hover:bg-white/10 rounded transition-colors relative" aria-label="ตะกร้า">
-              <ShoppingCart size={22} />
+              <Icon icon="fluent-emoji:shopping-cart" width={22} height={22} />
               {totalItems > 0 && (
                 <span className="absolute top-0.5 right-0.5 bg-orange text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {totalItems > 99 ? "99+" : totalItems}

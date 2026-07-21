@@ -12,6 +12,7 @@ export async function apiFetch<T>(
   init?: RequestInit
 ): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
+    cache: "no-store",
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -38,15 +39,26 @@ export interface ApiProduct {
   id: string;
   name: string;
   slug: string;
+  description: string | null;
+  description_full: string | null;
   price: number;
   original_price: number | null;
   brand: string;
+  sku: string | null;
+  category_id: string | null;
   images: string[];
   tags: string[];
+  colors: { name: string; hex: string }[];
+  sizes: string[];
+  stock: number;
+  is_active: boolean;
+  is_featured: boolean;
   rating: number | null;
   review_count: number;
   is_new: boolean;
   discount_label: string | null;
+  benefits: { title: string; desc: string }[];
+  specifications: Record<string, string>;
 }
 
 export interface ApiBanner {
@@ -185,6 +197,50 @@ export async function getPopularProducts(limit = 8): Promise<ApiProduct[]> {
   return result.data;
 }
 
+export async function getNewProducts(limit = 40): Promise<ApiProduct[]> {
+  const result = await apiFetch<PaginatedData<ApiProduct>>(
+    `/api/v1/products?is_new=true&limit=${limit}`
+  );
+  return result.data;
+}
+
+export interface ApiDeal {
+  id: string;
+  promotion_id: string;
+  product_id: string;
+  override_price: number | null;
+  override_label: string | null;
+  sort_order: number;
+  product: ApiProduct | null;
+}
+
+export function getActiveDeals(): Promise<ApiDeal[]> {
+  return apiFetch<ApiDeal[]>("/api/v1/promotions/deals");
+}
+
+export function dealToProductCard(deal: ApiDeal): ProductCard | null {
+  if (!deal.product) return null;
+  const p = deal.product;
+  const price = deal.override_price ?? p.price;
+  const original = p.original_price ?? p.price;
+  const discount =
+    original > price
+      ? Math.round(((original - price) / original) * 100)
+      : undefined;
+  return {
+    id: p.id,
+    image: p.images?.[0] ?? "",
+    name: p.name,
+    brand: p.brand,
+    price,
+    originalPrice: original > price ? original : undefined,
+    discount,
+    rating: p.rating ?? 0,
+    reviews: p.review_count ?? 0,
+    tags: deal.override_label ? [deal.override_label] : p.tags ?? [],
+  };
+}
+
 export async function searchProducts(
   query: string,
   opts?: { limit?: number; sort?: string; order?: string }
@@ -211,6 +267,19 @@ export interface ProductCard {
   rating: number;
   reviews: number;
   tags: string[];
+}
+
+export async function getProductById(id: string): Promise<ApiProduct> {
+  return apiFetch<ApiProduct>(`/api/v1/products/${id}`);
+}
+
+export async function getRelatedProducts(
+  id: string,
+  limit = 10
+): Promise<ApiProduct[]> {
+  return apiFetch<ApiProduct[]>(
+    `/api/v1/products/${id}/related?limit=${limit}`
+  );
 }
 
 export function toProductCard(p: ApiProduct): ProductCard {
@@ -243,6 +312,7 @@ export interface AuthUser {
   full_name: string;
   phone: string | null;
   avatar_url: string | null;
+  role: string;
 }
 
 export interface AuthTokens {
@@ -271,6 +341,44 @@ export async function authRegister(data: {
   return apiFetch<AuthTokens>("/api/v1/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export async function authUpdateProfile(
+  token: string,
+  data: { full_name?: string; phone?: string; avatar_url?: string }
+): Promise<AuthUser> {
+  return apiFetch<AuthUser>("/api/v1/auth/profile", {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function authChangePassword(
+  token: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  await apiFetch<void>("/api/v1/auth/profile/password", {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  });
+}
+
+export async function authChangeEmail(
+  token: string,
+  newEmail: string,
+  password: string
+): Promise<AuthUser> {
+  return apiFetch<AuthUser>("/api/v1/auth/profile/email", {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ new_email: newEmail, password }),
   });
 }
 
@@ -486,4 +594,300 @@ export function checkPaymentStatus(
   paymentId: string
 ): Promise<ApiPayment> {
   return apiFetch<ApiPayment>(`/api/v1/payments/${paymentId}/status`);
+}
+
+// ============================================
+// Favorites (สินค้าโปรด)
+// ============================================
+
+export interface ApiFavorite {
+  id: string;
+  user_id: string;
+  product_id: string;
+  created_at: string;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    brand: string;
+    price: number;
+    original_price: number | null;
+    images: string[];
+    rating: number | null;
+    review_count: number;
+  } | null;
+}
+
+export function getFavorites(
+  token: string,
+  opts?: { page?: number; limit?: number }
+): Promise<{ data: ApiFavorite[]; count: number }> {
+  const params = new URLSearchParams();
+  if (opts?.page) params.set("page", String(opts.page));
+  if (opts?.limit) params.set("limit", String(opts.limit));
+  const q = params.toString() ? `?${params.toString()}` : "";
+  return apiFetch<{ data: ApiFavorite[]; count: number }>(
+    `/api/v1/favorites${q}`,
+    { headers: authHeaders(token) }
+  );
+}
+
+export function getFavoriteIds(token: string): Promise<string[]> {
+  return apiFetch<string[]>("/api/v1/favorites/ids", {
+    headers: authHeaders(token),
+  });
+}
+
+export function toggleFavoriteApi(
+  token: string,
+  productId: string
+): Promise<{ favorited: boolean }> {
+  return apiFetch<{ favorited: boolean }>("/api/v1/favorites/toggle", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify({ product_id: productId }),
+  });
+}
+
+export function removeFavoriteApi(
+  token: string,
+  productId: string
+): Promise<void> {
+  return apiFetch<void>(`/api/v1/favorites/${productId}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+}
+
+// ============================================
+// Analytics (backoffice)
+// ============================================
+
+export interface AnalyticsRankItem {
+  id: string;
+  name: string;
+  image: string | null;
+  value: number;
+}
+
+export interface FavoriteAnalytics {
+  total_favorites: number;
+  unique_products: number;
+  unique_users: number;
+  top_favorited_products: AnalyticsRankItem[];
+  recent_favorites: {
+    user_name: string;
+    product_name: string;
+    product_image: string | null;
+    created_at: string;
+  }[];
+}
+
+export interface ViewAnalytics {
+  total_views: number;
+  unique_products_viewed: number;
+  unique_users: number;
+  top_viewed_products: AnalyticsRankItem[];
+  views_today: number;
+  views_this_week: number;
+}
+
+export interface PurchaseAnalytics {
+  total_orders: number;
+  total_revenue: number;
+  total_items_sold: number;
+  top_purchased_products: AnalyticsRankItem[];
+  average_order_value: number;
+  orders_today: number;
+}
+
+export interface FullAnalytics {
+  favorites: FavoriteAnalytics;
+  views: ViewAnalytics;
+  purchases: PurchaseAnalytics;
+}
+
+export function getAnalytics(token: string): Promise<FullAnalytics> {
+  return apiFetch<FullAnalytics>("/api/v1/analytics", {
+    headers: authHeaders(token),
+  });
+}
+
+// ============================================
+// Dashboard (backoffice stats)
+// ============================================
+
+export interface RankItem {
+  name: string;
+  value: number;
+}
+
+export interface DashboardStats {
+  summary: {
+    sales_total: number;
+    order_count: number;
+    product_count: number;
+    low_stock: number;
+    out_of_stock: number;
+    orders_today: number;
+    new_customers_today: number;
+  };
+  category_revenue: RankItem[];
+  product_revenue: RankItem[];
+  top_by_sold: RankItem[];
+  top_by_revenue: RankItem[];
+  top_categories_by_count: RankItem[];
+  top_customers: RankItem[];
+  recent_orders: {
+    id: string;
+    code: string;
+    customer: string;
+    total: number;
+    status: string;
+    date: string;
+  }[];
+}
+
+export function getDashboardStats(token: string): Promise<DashboardStats> {
+  return apiFetch<DashboardStats>("/api/v1/dashboard/stats", {
+    headers: authHeaders(token),
+  });
+}
+
+// ============================================
+// Notifications (backoffice)
+// ============================================
+
+export interface ApiNotification {
+  id: string;
+  type: "order" | "payment" | "stock" | "user" | "system";
+  title: string;
+  detail: string | null;
+  audience: "staff" | "customer";
+  order_id: string | null;
+  actor_name: string | null;
+  amount: number | null;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export function getNotifications(
+  token: string,
+  opts?: { limit?: number; unreadOnly?: boolean }
+): Promise<{ data: ApiNotification[]; unread_count: number }> {
+  const params = new URLSearchParams();
+  if (opts?.limit) params.set("limit", String(opts.limit));
+  if (opts?.unreadOnly) params.set("unread_only", "true");
+  const q = params.toString() ? `?${params.toString()}` : "";
+  return apiFetch<{ data: ApiNotification[]; unread_count: number }>(
+    `/api/v1/notifications${q}`,
+    { headers: authHeaders(token) }
+  );
+}
+
+export function getUnreadNotificationCount(
+  token: string
+): Promise<{ unread_count: number }> {
+  return apiFetch<{ unread_count: number }>(
+    "/api/v1/notifications/unread-count",
+    { headers: authHeaders(token) }
+  );
+}
+
+export function markNotificationRead(
+  token: string,
+  id: string
+): Promise<ApiNotification> {
+  return apiFetch<ApiNotification>(`/api/v1/notifications/${id}/read`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+  });
+}
+
+export function markAllNotificationsRead(token: string): Promise<void> {
+  return apiFetch<void>("/api/v1/notifications/read-all", {
+    method: "POST",
+    headers: authHeaders(token),
+  });
+}
+
+// ============================================
+// Cart (server-side, ผูกกับบัญชี)
+// ============================================
+
+export interface ApiCartItemProduct {
+  id: string;
+  name: string;
+  price: number;
+  original_price: number | null;
+  images: string[];
+  brand: string;
+  stock: number;
+}
+
+export interface ApiCartItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  quantity: number;
+  size: string | null;
+  color: string | null;
+  created_at: string;
+  updated_at: string;
+  product: ApiCartItemProduct;
+}
+
+export interface ApiCartSummary {
+  items: ApiCartItem[];
+  itemCount: number;
+  subtotal: number;
+  discount: number;
+  total: number;
+}
+
+export function getCartApi(token: string): Promise<ApiCartSummary> {
+  return apiFetch<ApiCartSummary>("/api/v1/cart", {
+    headers: authHeaders(token),
+  });
+}
+
+export function addCartItemApi(
+  token: string,
+  data: { product_id: string; quantity: number; size?: string; color?: string }
+): Promise<ApiCartItem[]> {
+  return apiFetch<ApiCartItem[]>("/api/v1/cart/items", {
+    method: "POST",
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateCartItemApi(
+  token: string,
+  id: string,
+  quantity: number
+): Promise<ApiCartItem[]> {
+  return apiFetch<ApiCartItem[]>(`/api/v1/cart/items/${id}`, {
+    method: "PATCH",
+    headers: authHeaders(token),
+    body: JSON.stringify({ quantity }),
+  });
+}
+
+export function removeCartItemApi(
+  token: string,
+  id: string
+): Promise<ApiCartItem[]> {
+  return apiFetch<ApiCartItem[]>(`/api/v1/cart/items/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
+}
+
+export function clearCartApi(token: string): Promise<void> {
+  return apiFetch<void>("/api/v1/cart", {
+    method: "DELETE",
+    headers: authHeaders(token),
+  });
 }

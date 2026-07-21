@@ -11,7 +11,7 @@ export class RecommendationService {
   private readonly db: SupabaseClient;
 
   constructor() {
-    this.db = Database.getInstance().getClient();
+    this.db = Database.getInstance().getAdminClient();
   }
 
   /**

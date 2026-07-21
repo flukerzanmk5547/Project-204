@@ -7,7 +7,7 @@ export abstract class BaseRepository<T> {
 
   constructor(tableName: string) {
     this.tableName = tableName;
-    this.db = Database.getInstance().getClient();
+    this.db = Database.getInstance().getAdminClient();
   }
 
   protected get table() {

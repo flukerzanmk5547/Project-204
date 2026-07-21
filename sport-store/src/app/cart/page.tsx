@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import FeedbackPanel from "@/components/FeedbackPanel";
 import Footer from "@/components/Footer";
 import { Minus, Plus, Trash2, Check, Tag } from "lucide-react";
+import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useCart } from "@/lib/CartContext";
 import { useAuth } from "@/lib/AuthContext";
@@ -224,6 +225,12 @@ export default function CartPage() {
 
               {items.length === 0 && (
                 <div className="py-16 text-center">
+                  <Icon
+                    icon="fluent-emoji:shopping-cart"
+                    width={64}
+                    height={64}
+                    className="mx-auto mb-4 opacity-40"
+                  />
                   <p className="text-lg text-text-secondary mb-4">
                     ตะกร้าของคุณว่างเปล่า
                   </p>

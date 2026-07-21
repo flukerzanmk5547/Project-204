@@ -13,7 +13,11 @@ export class Environment {
       NODE_ENV: process.env.NODE_ENV ?? "development",
       SUPABASE_URL: process.env.SUPABASE_URL ?? "",
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ?? "",
+      SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY ?? "",
       CORS_ORIGIN: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+      UAT_AUTO_CONFIRM_PAYMENT: process.env.UAT_AUTO_CONFIRM_PAYMENT ?? "false",
+      UAT_FIXED_AMOUNT: process.env.UAT_FIXED_AMOUNT ?? "1",
+      UAT_AUTO_CONFIRM_DELAY_MS: process.env.UAT_AUTO_CONFIRM_DELAY_MS ?? "10000",
     };
     this.validate();
   }
@@ -56,12 +60,32 @@ export class Environment {
     return this.env.NODE_ENV === "production";
   }
 
+  public get isUAT(): boolean {
+    return this.env.NODE_ENV === "uat";
+  }
+
+  public get uatAutoConfirmPayment(): boolean {
+    return this.isUAT && this.env.UAT_AUTO_CONFIRM_PAYMENT === "true";
+  }
+
+  public get uatFixedAmount(): number {
+    return parseFloat(this.env.UAT_FIXED_AMOUNT);
+  }
+
+  public get uatAutoConfirmDelayMs(): number {
+    return parseInt(this.env.UAT_AUTO_CONFIRM_DELAY_MS, 10);
+  }
+
   public get supabaseUrl(): string {
     return this.env.SUPABASE_URL;
   }
 
   public get supabaseAnonKey(): string {
     return this.env.SUPABASE_ANON_KEY;
+  }
+
+  public get supabaseServiceKey(): string {
+    return this.env.SUPABASE_SERVICE_KEY;
   }
 
   public get corsOrigin(): string {

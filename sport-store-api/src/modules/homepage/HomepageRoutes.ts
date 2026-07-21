@@ -12,7 +12,7 @@ export class HomepageRoutes {
   public register(app: FastifyInstance): void {
     app.register(
       async (router) => {
-        const auth = { preHandler: [AuthPlugin.authenticate] };
+        const auth = { preHandler: [AuthPlugin.requireRole("manager")] };
         const c = this.controller;
 
         // === Public ===

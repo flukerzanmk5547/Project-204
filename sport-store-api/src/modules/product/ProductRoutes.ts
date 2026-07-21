@@ -20,22 +20,11 @@ export class ProductRoutes {
           this.controller.getRelated.bind(this.controller)
         );
 
-        // Protected routes
-        router.post(
-          "/",
-          { preHandler: [AuthPlugin.authenticate] },
-          this.controller.create.bind(this.controller)
-        );
-        router.put(
-          "/:id",
-          { preHandler: [AuthPlugin.authenticate] },
-          this.controller.update.bind(this.controller)
-        );
-        router.delete(
-          "/:id",
-          { preHandler: [AuthPlugin.authenticate] },
-          this.controller.delete.bind(this.controller)
-        );
+        // Reseller+ routes
+        const reseller = AuthPlugin.requireRole("reseller");
+        router.post("/", { preHandler: [reseller] }, this.controller.create.bind(this.controller));
+        router.put("/:id", { preHandler: [reseller] }, this.controller.update.bind(this.controller));
+        router.delete("/:id", { preHandler: [reseller] }, this.controller.delete.bind(this.controller));
       },
       { prefix: "/api/v1/products" }
     );

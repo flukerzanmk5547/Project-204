@@ -13,7 +13,7 @@ export class BundleRepository extends BaseRepository<ProductBundle> {
 
   constructor() {
     super("product_bundles");
-    const db: SupabaseClient = Database.getInstance().getClient();
+    const db: SupabaseClient = Database.getInstance().getAdminClient();
     this.bundleItemsTable = db.from("bundle_items");
     this.linksTable = db.from("product_bundle_links");
   }

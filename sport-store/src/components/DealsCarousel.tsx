@@ -5,6 +5,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import type { CartProduct } from "./CartPanel";
 import { getHomepageSections, toProductCard } from "@/lib/api";
+import FavoriteButton from "./FavoriteButton";
 
 interface Product {
   id: number | string;
@@ -322,20 +323,35 @@ export default function DealsCarousel({ onAddToCart }: DealsCarouselProps) {
                       {product.rating} ({product.reviews.toLocaleString()})
                     </span>
                   </div>
-                  <button
-                    className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-                    onClick={() => onAddToCart?.({
-                      id: product.id,
-                      image: product.image,
-                      name: product.name,
-                      brand: product.brand,
-                      price: product.price,
-                      originalPrice: product.originalPrice,
-                      discount: product.discount,
-                    })}
-                  >
-                    <ShoppingCart size={16} className="text-text-secondary" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <FavoriteButton
+                      product={{
+                        id: product.id,
+                        name: product.name,
+                        brand: product.brand,
+                        image: product.image,
+                        price: product.price,
+                        originalPrice: product.originalPrice,
+                        discount: product.discount,
+                        rating: product.rating,
+                        reviews: product.reviews,
+                      }}
+                    />
+                    <button
+                      className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                      onClick={() => onAddToCart?.({
+                        id: product.id,
+                        image: product.image,
+                        name: product.name,
+                        brand: product.brand,
+                        price: product.price,
+                        originalPrice: product.originalPrice,
+                        discount: product.discount,
+                      })}
+                    >
+                      <ShoppingCart size={16} className="text-text-secondary" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

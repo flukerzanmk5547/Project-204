@@ -3,15 +3,23 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Home, CheckCircle2, ChevronDown, Loader2, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
 type LoginTab = "email" | "phone";
 type LoginStep = "identifier" | "password";
 
+const ROLE_LEVEL: Record<string, number> = {
+  customer: 0,
+  reseller: 1,
+  manager: 2,
+  superadmin: 3,
+};
+
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
 
   const [tab, setTab] = useState<LoginTab>("email");
   const [step, setStep] = useState<LoginStep>("identifier");
@@ -47,7 +55,17 @@ export default function LoginPage() {
     try {
       const loginEmail =
         tab === "email" ? email : `${phone}@phone.sportgear.th`;
-      await login(loginEmail, password);
+      const user = await login(loginEmail, password);
+
+      // บัญชีพนักงาน (reseller ขึ้นไป) ต้องเข้าผ่านหน้าจัดการหลังบ้าน
+      if ((ROLE_LEVEL[user.role] ?? 0) >= 1) {
+        await logout();
+        setError(
+          "บัญชีนี้เป็นบัญชีพนักงาน กรุณาเข้าสู่ระบบผ่านหน้าจัดการหลังบ้าน"
+        );
+        return;
+      }
+
       router.push("/");
     } catch (err) {
       const msg =
@@ -71,12 +89,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Top Bar */}
-      <div className="border-b border-gray-200">
+      <div className="bg-navy">
         <div className="max-w-[1440px] mx-auto px-4 py-3 flex items-center relative">
           {step === "password" ? (
             <button
               onClick={handleBack}
-              className="flex items-center gap-2 text-sm text-text-secondary hover:text-navy transition-colors"
+              className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
             >
               <Home className="w-4 h-4" />
               <span>กลับ</span>
@@ -84,7 +102,7 @@ export default function LoginPage() {
           ) : (
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm text-text-secondary hover:text-navy transition-colors"
+              className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
             >
               <Home className="w-4 h-4" />
               <span>กลับ</span>
@@ -92,23 +110,14 @@ export default function LoginPage() {
           )}
 
           <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-            <svg
-              viewBox="0 0 200 30"
-              className="h-6 w-auto fill-navy"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <text
-                x="50%"
-                y="24"
-                fontFamily="Arial Black, sans-serif"
-                fontSize="22"
-                fontWeight="900"
-                letterSpacing="2"
-                textAnchor="middle"
-              >
-                SPORTGEAR
-              </text>
-            </svg>
+            <Image
+              src="/sportgear-logo.png"
+              alt="SportGear"
+              width={1514}
+              height={300}
+              priority
+              className="h-7 w-auto object-contain"
+            />
           </Link>
         </div>
       </div>

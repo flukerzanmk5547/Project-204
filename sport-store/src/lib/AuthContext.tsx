@@ -24,7 +24,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser>;
   register: (data: {
     email: string;
     password: string;
@@ -32,7 +32,11 @@ interface AuthContextValue extends AuthState {
     phone?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: AuthUser) => void;
   isLoggedIn: boolean;
+  role: string;
+  isManager: boolean;
+  isReseller: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -79,6 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user: null, token: null, loading: false });
   }, []);
 
+  const updateUser = useCallback((user: AuthUser) => {
+    setState((s) => ({ ...s, user }));
+  }, []);
+
   useEffect(() => {
     const stored = getStoredTokens();
     if (!stored) {
@@ -103,10 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [setAuth, clearAuth]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string): Promise<AuthUser> => {
       const result = await authLogin(email, password);
       storeTokens(result.access_token, result.refresh_token);
       setAuth(result.user, result.access_token);
+      return result.user;
     },
     [setAuth]
   );
@@ -136,6 +145,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAuth();
   }, [state.token, clearAuth]);
 
+  const role = state.user?.role ?? "customer";
+  const ROLE_LEVEL: Record<string, number> = {
+    customer: 0,
+    reseller: 1,
+    manager: 2,
+    superadmin: 3,
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -143,7 +160,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateUser,
         isLoggedIn: !!state.user,
+        role,
+        isManager: (ROLE_LEVEL[role] ?? 0) >= 2,
+        isReseller: (ROLE_LEVEL[role] ?? 0) >= 1,
       }}
     >
       {children}

@@ -19,15 +19,15 @@ export class PromotionRoutes {
         router.get("/:id", this.controller.getById.bind(this.controller));
         router.get("/:id/products", this.controller.getProducts.bind(this.controller));
 
-        // Admin
-        router.post("/", { preHandler: [AuthPlugin.authenticate] }, this.controller.create.bind(this.controller));
-        router.put("/:id", { preHandler: [AuthPlugin.authenticate] }, this.controller.update.bind(this.controller));
-        router.delete("/:id", { preHandler: [AuthPlugin.authenticate] }, this.controller.delete.bind(this.controller));
+        // Reseller+
+        const reseller = AuthPlugin.requireRole("reseller");
+        router.post("/", { preHandler: [reseller] }, this.controller.create.bind(this.controller));
+        router.put("/:id", { preHandler: [reseller] }, this.controller.update.bind(this.controller));
+        router.delete("/:id", { preHandler: [reseller] }, this.controller.delete.bind(this.controller));
 
-        // Promotion products
-        router.post("/products", { preHandler: [AuthPlugin.authenticate] }, this.controller.addProduct.bind(this.controller));
-        router.put("/products/:id", { preHandler: [AuthPlugin.authenticate] }, this.controller.updateProduct.bind(this.controller));
-        router.delete("/products/:promotionId/:productId", { preHandler: [AuthPlugin.authenticate] }, this.controller.removeProduct.bind(this.controller));
+        router.post("/products", { preHandler: [reseller] }, this.controller.addProduct.bind(this.controller));
+        router.put("/products/:id", { preHandler: [reseller] }, this.controller.updateProduct.bind(this.controller));
+        router.delete("/products/:promotionId/:productId", { preHandler: [reseller] }, this.controller.removeProduct.bind(this.controller));
       },
       { prefix: "/api/v1/promotions" }
     );

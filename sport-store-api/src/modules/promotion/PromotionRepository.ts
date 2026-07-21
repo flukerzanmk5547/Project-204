@@ -6,7 +6,7 @@ export class PromotionRepository {
   private readonly db: SupabaseClient;
 
   constructor() {
-    this.db = Database.getInstance().getClient();
+    this.db = Database.getInstance().getAdminClient();
   }
 
   public async findAll(activeOnly = false): Promise<Promotion[]> {

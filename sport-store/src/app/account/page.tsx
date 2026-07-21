@@ -3,15 +3,8 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Package,
-  MapPin,
-  Heart,
-  LogOut,
-  ChevronRight,
-  Loader2,
-  User,
-} from "lucide-react";
+import { LogOut, ChevronRight, Loader2, User } from "lucide-react";
+import { Icon } from "@iconify/react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FeedbackPanel from "@/components/FeedbackPanel";
@@ -43,22 +36,29 @@ export default function AccountPage() {
 
   const menu = [
     {
+      href: "/account/profile",
+      icon: "fluent-emoji:identification-card",
+      title: "แก้ไขข้อมูลส่วนตัว",
+      desc: "ชื่อ อีเมล รหัสผ่าน เบอร์โทรศัพท์",
+      badge: null as string | null,
+    },
+    {
       href: "/account/orders",
-      icon: Package,
+      icon: "fluent-emoji:package",
       title: "คำสั่งซื้อของฉัน",
       desc: "ดูประวัติและติดตามสถานะคำสั่งซื้อ",
       badge: null as string | null,
     },
     {
       href: "/account/addresses",
-      icon: MapPin,
+      icon: "fluent-emoji:round-pushpin",
       title: "สมุดที่อยู่",
       desc: "จัดการที่อยู่จัดส่งของคุณ",
       badge: null,
     },
     {
       href: "/favorites",
-      icon: Heart,
+      icon: "fluent-emoji:red-heart",
       title: "สินค้าโปรด",
       desc: "สินค้าที่คุณบันทึกไว้",
       badge: favCount > 0 ? String(favCount) : null,
@@ -101,16 +101,16 @@ export default function AccountPage() {
         </div>
 
         {/* Menu */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          {menu.map(({ href, icon: Icon, title, desc, badge }) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {menu.map(({ href, icon, title, desc, badge }) => (
             <Link
               key={href}
               href={href}
               className="bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-accent hover:shadow-md transition-all group"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className="w-11 h-11 rounded-lg bg-blue-50 text-blue-accent flex items-center justify-center">
-                  <Icon size={22} />
+                <div className="w-11 h-11 flex items-center justify-center">
+                  <Icon icon={icon} width={40} height={40} />
                 </div>
                 {badge ? (
                   <span className="text-xs font-bold text-white bg-orange rounded-full min-w-5 h-5 px-1.5 flex items-center justify-center">

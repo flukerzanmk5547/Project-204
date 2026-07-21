@@ -883,7 +883,11 @@ export default function CategoryPage({
 
         {/* Only children, no products */}
         {!hasProducts && hasChildren && (
-          <div className="pb-12" />
+          <div className="text-center py-16 pb-16">
+            <p className="text-text-secondary">
+              เลือกหมวดหมู่ย่อยด้านบนเพื่อดูสินค้า
+            </p>
+          </div>
         )}
       </main>
 

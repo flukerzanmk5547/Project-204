@@ -6,8 +6,18 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
   type ReactNode,
 } from "react";
+import { useAuth } from "./AuthContext";
+import {
+  getCartApi,
+  addCartItemApi,
+  updateCartItemApi,
+  removeCartItemApi,
+  clearCartApi,
+  type ApiCartItem,
+} from "./api";
 
 export interface CartItem {
   id: string | number;
@@ -49,65 +59,238 @@ function saveCart(items: CartItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
+function rowKey(id: string | number, size: string): string {
+  return `${String(id)}|${size ?? ""}`;
+}
+
+// แปลง cart จาก server → CartItem[] ของ frontend + เก็บ map ของ row id ไว้ใช้ update/remove
+function mapServerItems(apiItems: ApiCartItem[]): {
+  items: CartItem[];
+  rowIds: Map<string, string>;
+} {
+  const rowIds = new Map<string, string>();
+  const items = apiItems.map((it) => {
+    const size = it.size ?? "";
+    rowIds.set(rowKey(it.product_id, size), it.id);
+    const price = it.product?.price ?? 0;
+    const orig = it.product?.original_price ?? undefined;
+    const hasDiscount = orig !== undefined && orig > price;
+    return {
+      id: it.product_id,
+      name: it.product?.name ?? "",
+      brand: it.product?.brand ?? "",
+      image: it.product?.images?.[0] ?? "",
+      price,
+      originalPrice: hasDiscount ? orig : undefined,
+      discount: hasDiscount
+        ? Math.round(((orig! - price) / orig!) * 100)
+        : undefined,
+      size,
+      quantity: it.quantity,
+    } as CartItem;
+  });
+  return { items, rowIds };
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const { user, token, loading: authLoading } = useAuth();
+  const isLoggedIn = !!user;
 
+  const prevUserIdRef = useRef<string | null | undefined>(undefined);
+  const syncedUserRef = useRef<string | null>(null);
+  const serverRowIds = useRef<Map<string, string>>(new Map());
+
+  // โหลดจาก localStorage ครั้งแรก (สำหรับ guest)
   useEffect(() => {
     setItems(loadCart());
     setLoaded(true);
   }, []);
 
+  // เก็บลง localStorage เฉพาะตอนเป็น guest (และ auth โหลดเสร็จแล้ว)
+  // ตะกร้าของ user ที่ login อยู่บน server ไม่ยุ่งกับ localStorage
   useEffect(() => {
-    if (loaded) saveCart(items);
-  }, [items, loaded]);
+    if (!loaded || authLoading) return;
+    if (isLoggedIn) return;
+    saveCart(items);
+  }, [items, loaded, isLoggedIn, authLoading]);
+
+  const applyServerCart = useCallback((apiItems: ApiCartItem[]) => {
+    const { items: mapped, rowIds } = mapServerItems(apiItems);
+    serverRowIds.current = rowIds;
+    setItems(mapped);
+  }, []);
+
+  // จัดการ login / logout / สลับบัญชี
+  useEffect(() => {
+    if (authLoading) return;
+    const currentId = user?.id ?? null;
+    const prevId = prevUserIdRef.current;
+    prevUserIdRef.current = currentId;
+
+    if (currentId && token) {
+      // login แล้ว — sync ตะกร้ากับ server (ทำครั้งเดียวต่อ user)
+      if (syncedUserRef.current === currentId) return;
+      syncedUserRef.current = currentId;
+
+      // merge ตะกร้า guest เข้า server เฉพาะตอน "เพิ่ง login จาก guest" เท่านั้น
+      // (prevId === null = เคยเห็นสถานะ guest มาก่อนใน mount นี้)
+      // ถ้า refresh ทั้งๆ ที่ login อยู่แล้ว prevId จะเป็น undefined → ไม่ merge
+      // ป้องกันไม่ให้สินค้าที่ลบไปแล้วถูก re-add จาก localStorage กลับเข้า server
+      const shouldMergeGuest = prevId === null;
+
+      (async () => {
+        try {
+          if (shouldMergeGuest) {
+            const guestItems = loadCart();
+            for (const gi of guestItems) {
+              await addCartItemApi(token, {
+                product_id: String(gi.id),
+                quantity: gi.quantity,
+                size: gi.size || undefined,
+              }).catch(() => {});
+            }
+          }
+          // ตะกร้าของ user อยู่บน server แล้ว — เคลียร์ localStorage ทิ้งเสมอ
+          saveCart([]);
+          const summary = await getCartApi(token);
+          applyServerCart(summary.items);
+        } catch {
+          /* ignore */
+        }
+      })();
+    } else if (!currentId) {
+      syncedUserRef.current = null;
+      serverRowIds.current = new Map();
+
+      // logout จริง (เคย login มาก่อน) → ล้างตะกร้า local ทิ้ง
+      // (ข้อมูลปลอดภัยอยู่ใน account บน server แล้ว)
+      if (prevId !== undefined && prevId !== null && prevId !== currentId) {
+        setItems([]);
+        saveCart([]);
+      }
+    }
+  }, [user, token, authLoading, applyServerCart]);
 
   const addItem = useCallback(
     (item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
+      const qty = item.quantity ?? 1;
+      const size = item.size ?? "";
+
       setItems((prev) => {
         const existing = prev.find(
-          (i) => i.id === item.id && i.size === item.size
+          (i) => String(i.id) === String(item.id) && i.size === size
         );
         if (existing) {
           return prev.map((i) =>
-            i.id === item.id && i.size === item.size
-              ? { ...i, quantity: i.quantity + (item.quantity ?? 1) }
+            String(i.id) === String(item.id) && i.size === size
+              ? { ...i, quantity: i.quantity + qty }
               : i
           );
         }
-        return [...prev, { ...item, quantity: item.quantity ?? 1 }];
+        return [...prev, { ...item, size, quantity: qty }];
       });
+
+      if (token) {
+        addCartItemApi(token, {
+          product_id: String(item.id),
+          quantity: qty,
+          size: size || undefined,
+        })
+          .then(applyServerCart)
+          .catch(() => {});
+      }
+    },
+    [token, applyServerCart]
+  );
+
+  // หา row id ของสินค้าบน server — ถ้าไม่มีใน cache ให้ดึงตะกร้าล่าสุดมาหา
+  const resolveRowId = useCallback(
+    async (
+      authToken: string,
+      id: string | number,
+      size: string
+    ): Promise<string | null> => {
+      const cached = serverRowIds.current.get(rowKey(id, size));
+      if (cached) return cached;
+      try {
+        const summary = await getCartApi(authToken);
+        const { rowIds } = mapServerItems(summary.items);
+        serverRowIds.current = rowIds;
+        return rowIds.get(rowKey(id, size)) ?? null;
+      } catch {
+        return null;
+      }
     },
     []
   );
 
-  const removeItem = useCallback((id: string | number, size: string) => {
-    setItems((prev) => prev.filter((i) => !(i.id === id && i.size === size)));
-  }, []);
+  const removeItem = useCallback(
+    (id: string | number, size: string) => {
+      setItems((prev) =>
+        prev.filter((i) => !(String(i.id) === String(id) && i.size === size))
+      );
+
+      if (token) {
+        resolveRowId(token, id, size).then((rowId) => {
+          if (rowId) {
+            removeCartItemApi(token, rowId)
+              .then(applyServerCart)
+              .catch(() => {});
+          }
+        });
+      }
+    },
+    [token, applyServerCart, resolveRowId]
+  );
 
   const updateQuantity = useCallback(
     (id: string | number, size: string, qty: number) => {
-      if (qty <= 0) {
-        removeItem(id, size);
-        return;
-      }
+      if (qty < 1) return;
       setItems((prev) =>
         prev.map((i) =>
-          i.id === id && i.size === size ? { ...i, quantity: qty } : i
+          String(i.id) === String(id) && i.size === size
+            ? { ...i, quantity: qty }
+            : i
         )
       );
+
+      if (token) {
+        resolveRowId(token, id, size).then((rowId) => {
+          if (rowId) {
+            updateCartItemApi(token, rowId, qty)
+              .then(applyServerCart)
+              .catch(() => {});
+          }
+        });
+      }
     },
-    [removeItem]
+    [token, applyServerCart, resolveRowId]
   );
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    serverRowIds.current = new Map();
+    if (token) {
+      clearCartApi(token).catch(() => {});
+    }
+  }, [token]);
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, totalItems, totalPrice, addItem, removeItem, updateQuantity, clearCart }}
+      value={{
+        items,
+        totalItems,
+        totalPrice,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

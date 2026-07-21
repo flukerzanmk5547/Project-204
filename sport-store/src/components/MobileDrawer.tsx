@@ -31,9 +31,8 @@ function treeToDrawerItems(tree: ApiCategoryTree[]): DrawerMenuItem[] {
 }
 
 const highlightItems = [
-  { label: "ดีลพิเศษ", color: "text-red-500" },
-  { label: "สินค้ามาใหม่", color: "text-blue-accent" },
-  { label: "แบรนด์พาร์ทเนอร์", color: "text-blue-accent" },
+  { label: "ดีลพิเศษ", color: "text-red-500", href: "/deals" },
+  { label: "สินค้าใหม่", color: "text-blue-accent", href: "/new" },
 ];
 
 const bottomItems = [
@@ -137,12 +136,14 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
           {/* Highlight Items */}
           <div className="px-5 py-2">
             {highlightItems.map((item) => (
-              <button
+              <Link
                 key={item.label}
+                href={item.href}
+                onClick={onClose}
                 className={`block w-full text-left py-3 text-xl font-bold hover:opacity-70 transition-opacity ${item.color}`}
               >
                 {item.label}
-              </button>
+              </Link>
             ))}
           </div>
 

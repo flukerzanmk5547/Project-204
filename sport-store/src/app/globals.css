@@ -45,3 +45,105 @@ body {
     transform: translateY(0);
   }
 }
+
+/* ============================================
+   BACKOFFICE THEME (navy / blue / white — ตามหน้าร้าน)
+   ============================================ */
+
+.bo-root {
+  --bo-bg: #f4f7fc;
+  --bo-surface: #ffffff;
+  --bo-border: #e4e9f2;
+  --bo-navy: #0b1f3f;
+  --bo-navy-light: #1a3160;
+  --bo-blue: #3d7bf7;
+  --bo-blue-dark: #2d6be7;
+  --bo-blue-soft: #eaf1fe;
+  --bo-text: #16233b;
+  --bo-text-dim: #64748b;
+  --bo-orange: #f57c20;
+
+  font-family: var(--font-sans);
+  color: var(--bo-text);
+  background:
+    radial-gradient(900px 500px at 100% -10%, rgba(61, 123, 247, 0.06), transparent 60%),
+    var(--bo-bg);
+}
+
+/* ฟอนต์ backoffice ตามที่กำหนด (Pentor) — มี fallback กันภาษาไทยเพี้ยน */
+.bo-root,
+.bo-root * {
+  font-family: pentor, "Material Icons", "Material Icons Outlined",
+    var(--font-noto-thai), "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.font-cinzel {
+  letter-spacing: 0;
+}
+
+/* แถบสีน้ำเงินฟ้าพาสเทล สำหรับ header + โลโก้ sidebar */
+.bo-bluebar {
+  background: linear-gradient(90deg, #2f6fd6 0%, #4f8bef 100%);
+  color: #ffffff;
+}
+
+.bo-panel {
+  position: relative;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-border);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 20px rgba(15, 23, 42, 0.04);
+}
+
+.bo-panel-glow {
+  border-color: #cfe0fd;
+  box-shadow: 0 6px 24px rgba(61, 123, 247, 0.14);
+}
+
+/* หัวข้อไล่เฉดน้ำเงิน */
+.bo-gold-text {
+  background: linear-gradient(90deg, #0b1f3f 0%, #3d7bf7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ปุ่มหลัก สีน้ำเงินตามหน้าร้าน */
+.bo-btn-gold {
+  background: linear-gradient(180deg, #4d87f9, #3d7bf7);
+  color: #ffffff;
+  border: 1px solid #2d6be7;
+  box-shadow: 0 6px 16px rgba(61, 123, 247, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.bo-btn-gold:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(61, 123, 247, 0.4);
+}
+
+.bo-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.bo-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+.bo-scroll::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes bo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.bo-float { animation: bo-float 4s ease-in-out infinite; }
+
+@keyframes bo-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(61, 123, 247, 0); }
+  50% { box-shadow: 0 0 16px 2px rgba(61, 123, 247, 0.3); }
+}
+.bo-pulse { animation: bo-pulse-glow 2.6s ease-in-out infinite; }
+
+@keyframes bo-sheen {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.bo-xpbar-fill {
+  background: linear-gradient(90deg, #3d7bf7, #7aa8fb, #3d7bf7);
+  background-size: 200% 100%;
+  animation: bo-sheen 3s linear infinite;
+}

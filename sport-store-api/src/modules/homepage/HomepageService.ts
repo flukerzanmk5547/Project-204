@@ -33,7 +33,7 @@ export class HomepageService {
   private readonly db: SupabaseClient;
 
   constructor() {
-    this.db = Database.getInstance().getClient();
+    this.db = Database.getInstance().getAdminClient();
   }
 
   public async getSections(): Promise<HomepageSection[]> {

@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   getCategoryTree,
   getBanners,
@@ -87,12 +88,12 @@ const fallbackPromo: PromoBanner[] = [
 ];
 
 const highlightItems = [
-  { label: "ดีลพิเศษ", className: "text-blue-accent font-semibold", link: "#deals" },
-  { label: "สินค้าใหม่", className: "font-semibold", link: "#new" },
-  { label: "แบรนด์สปอร์ตเกียร์", className: "", link: "#brands" },
+  { label: "ดีลพิเศษ", className: "text-blue-accent font-semibold", link: "/deals" },
+  { label: "สินค้าใหม่", className: "text-blue-accent font-semibold", link: "/new" },
 ];
 
 export default function NavMenu() {
+  const pathname = usePathname();
   const [menuItems, setMenuItems] = useState<MenuData[]>(fallbackMenuItems);
   const [promoBanners, setPromoBanners] = useState<PromoBanner[]>(fallbackPromo);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -192,16 +193,24 @@ export default function NavMenu() {
             </li>
           ))}
           <li className="w-px h-6 bg-gray-border mx-1" />
-          {highlightItems.map((item) => (
-            <li key={item.label}>
-              <button
-                className={`px-4 py-3.5 text-sm whitespace-nowrap hover:text-blue-accent transition-colors relative group ${item.className}`}
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-accent scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              </button>
-            </li>
-          ))}
+          {highlightItems.map((item) => {
+            const isActive = pathname === item.link;
+            return (
+              <li key={item.label}>
+                <Link
+                  href={item.link}
+                  className={`block px-4 py-3.5 text-sm whitespace-nowrap hover:text-blue-accent transition-colors relative group ${item.className}`}
+                >
+                  {item.label}
+                  <span
+                    className={`absolute bottom-0 left-0 right-0 h-[2px] bg-blue-accent transition-transform origin-left ${
+                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    }`}
+                  />
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
