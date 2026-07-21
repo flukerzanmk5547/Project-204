@@ -958,3 +958,63 @@ export function deleteReview(token: string, id: string): Promise<void> {
     headers: authHeaders(token),
   });
 }
+
+// ============================================
+// Feedback (แบบประเมินความพึงพอใจ)
+// ============================================
+
+export interface ApiFeedback {
+  id: string;
+  user_id: string | null;
+  rating: number;
+  purpose: string | null;
+  achieved: string | null;
+  comment: string | null;
+  page_url: string | null;
+  created_at: string;
+}
+
+export interface FeedbackSummary {
+  average: number;
+  total: number;
+  breakdown: Record<string, number>;
+  by_purpose: Record<string, number>;
+}
+
+/** ส่งแบบประเมิน — ไม่บังคับล็อกอิน (ถ้ามี token จะผูกกับผู้ใช้ให้) */
+export function submitFeedback(
+  payload: {
+    rating: number;
+    purpose?: string;
+    achieved?: string;
+    comment?: string;
+    page_url?: string;
+  },
+  token?: string | null
+): Promise<ApiFeedback> {
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return apiFetch<ApiFeedback>("/api/v1/feedbacks", {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  });
+}
+
+/** ดูผลประเมินทั้งหมด (reseller ขึ้นไป) */
+export function getFeedbacks(
+  token: string,
+  page = 1,
+  limit = 50
+): Promise<{ data: ApiFeedback[]; count: number }> {
+  return apiFetch<{ data: ApiFeedback[]; count: number }>(
+    `/api/v1/feedbacks?page=${page}&limit=${limit}`,
+    { headers: authHeaders(token) }
+  );
+}
+
+export function getFeedbackSummary(token: string): Promise<FeedbackSummary> {
+  return apiFetch<FeedbackSummary>("/api/v1/feedbacks/summary", {
+    headers: authHeaders(token),
+  });
+}

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { X, ChevronDown } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { submitFeedback } from "@/lib/api";
 
 const ratingLabels = { low: "ไม่พอใจอย่างมาก", high: "พอใจอย่างมาก" };
 
@@ -160,6 +162,7 @@ function FeedbackForm({
 }
 
 export default function FeedbackPanel() {
+  const { token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState<number | null>(null);
   const [purpose, setPurpose] = useState("");
@@ -178,7 +181,24 @@ export default function FeedbackPanel() {
   }, [isOpen]);
 
   const handleSubmit = () => {
+    // แสดงผลทันทีไม่ต้องรอ API เพื่อไม่ให้ผู้ใช้ค้าง
     setSubmitted(true);
+
+    if (rating !== null) {
+      submitFeedback(
+        {
+          rating,
+          purpose: purpose || undefined,
+          achieved: achieved || undefined,
+          page_url:
+            typeof window !== "undefined" ? window.location.pathname : undefined,
+        },
+        token
+      ).catch(() => {
+        /* ส่งไม่สำเร็จก็ไม่รบกวนผู้ใช้ */
+      });
+    }
+
     setTimeout(() => {
       setIsOpen(false);
       setSubmitted(false);

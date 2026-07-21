@@ -25,6 +25,7 @@ import { SuperAdminRoutes } from "./modules/superadmin/SuperAdminRoutes.js";
 import { FavoriteRoutes } from "./modules/favorite/FavoriteRoutes.js";
 import { AnalyticsRoutes } from "./modules/analytics/AnalyticsRoutes.js";
 import { ReviewRoutes } from "./modules/review/ReviewRoutes.js";
+import { FeedbackRoutes } from "./modules/feedback/FeedbackRoutes.js";
 import { getLineBotInstance } from "./modules/payment/LineBotService.js";
 
 export class Application {
@@ -102,6 +103,7 @@ export class Application {
     new FavoriteRoutes().register(this.app);
     new AnalyticsRoutes().register(this.app);
     new ReviewRoutes().register(this.app);
+    new FeedbackRoutes().register(this.app);
   }
 
   public async start(): Promise<void> {
