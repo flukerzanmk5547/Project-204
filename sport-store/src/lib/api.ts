@@ -11,13 +11,16 @@ export async function apiFetch<T>(
   path: string,
   init?: RequestInit
 ): Promise<T> {
+  const hasBody = init?.body !== undefined && init?.body !== null;
+  const headers: Record<string, string> = {
+    ...(hasBody ? { "Content-Type": "application/json" } : {}),
+    ...(init?.headers as Record<string, string>),
+  };
+
   const res = await fetch(`${API_URL}${path}`, {
     cache: "no-store",
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
+    headers,
   });
 
   if (!res.ok) {
@@ -29,6 +32,8 @@ export async function apiFetch<T>(
     } catch { /* ไม่สามารถ parse error body */ }
     throw new Error(msg);
   }
+
+  if (res.status === 204) return undefined as T;
 
   const json = (await res.json()) as ApiResponse<T>;
   return json.data;
