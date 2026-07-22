@@ -102,6 +102,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const syncedUserRef = useRef<string | null>(null);
   const serverRowIds = useRef<Map<string, string>>(new Map());
 
+  // คิวจัดการ mutation ตะกร้าให้ทำงาน "ทีละอันตามลำดับ"
+  // กัน race condition เช่น เพิ่มสินค้าแล้วรีบลบก่อนที่การเพิ่มจะ commit ที่ server
+  // (ทำให้ resolveRowId หา row ไม่เจอ → ไม่ได้ยิง DELETE → สินค้าเด้งกลับมา)
+  const opQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const enqueue = useCallback((fn: () => Promise<void>) => {
+    opQueue.current = opQueue.current.then(() => fn()).catch(() => {});
+  }, []);
+
   // โหลดจาก localStorage ครั้งแรก (สำหรับ guest)
   useEffect(() => {
     setItems(loadCart());
@@ -193,16 +201,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
 
       if (token) {
-        addCartItemApi(token, {
-          product_id: String(item.id),
-          quantity: qty,
-          size: size || undefined,
-        })
-          .then(applyServerCart)
-          .catch(() => {});
+        enqueue(async () => {
+          const server = await addCartItemApi(token, {
+            product_id: String(item.id),
+            quantity: qty,
+            size: size || undefined,
+          });
+          applyServerCart(server);
+        });
       }
     },
-    [token, applyServerCart]
+    [token, applyServerCart, enqueue]
   );
 
   // หา row id ของสินค้าบน server — ถ้าไม่มีใน cache ให้ดึงตะกร้าล่าสุดมาหา
@@ -233,16 +242,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       );
 
       if (token) {
-        resolveRowId(token, id, size).then((rowId) => {
+        enqueue(async () => {
+          const rowId = await resolveRowId(token, id, size);
           if (rowId) {
-            removeCartItemApi(token, rowId)
-              .then(applyServerCart)
-              .catch(() => {});
+            const server = await removeCartItemApi(token, rowId);
+            applyServerCart(server);
+          } else {
+            // หา row ไม่เจอ (เช่น เพิ่งลบไปแล้ว) — sync ให้ตรงกับ server
+            const summary = await getCartApi(token);
+            applyServerCart(summary.items);
           }
         });
       }
     },
-    [token, applyServerCart, resolveRowId]
+    [token, applyServerCart, resolveRowId, enqueue]
   );
 
   const updateQuantity = useCallback(
@@ -257,25 +270,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
       );
 
       if (token) {
-        resolveRowId(token, id, size).then((rowId) => {
+        enqueue(async () => {
+          const rowId = await resolveRowId(token, id, size);
           if (rowId) {
-            updateCartItemApi(token, rowId, qty)
-              .then(applyServerCart)
-              .catch(() => {});
+            const server = await updateCartItemApi(token, rowId, qty);
+            applyServerCart(server);
           }
         });
       }
     },
-    [token, applyServerCart, resolveRowId]
+    [token, applyServerCart, resolveRowId, enqueue]
   );
 
   const clearCart = useCallback(() => {
     setItems([]);
     serverRowIds.current = new Map();
     if (token) {
-      clearCartApi(token).catch(() => {});
+      enqueue(async () => {
+        await clearCartApi(token);
+        applyServerCart([]);
+      });
     }
-  }, [token]);
+  }, [token, applyServerCart, enqueue]);
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
