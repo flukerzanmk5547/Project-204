@@ -1135,6 +1135,40 @@ flowchart TB
     BE -.แจ้งเตือน.-> LINE
 ```
 
+## โครงสร้างฐานข้อมูล (Database Schema)
+
+ไฟล์ schema/migration อยู่ที่ [`sport-store-api/sql/`](sport-store-api/sql) — รันเรียงลำดับ `001` → `014`
+ตรวจแล้วตรงกับ DB จริงบน Supabase: **31 ตาราง** (git = production ครบทุกตาราง)
+
+| กลุ่ม | ตาราง |
+| --- | --- |
+| **ผู้ใช้ & สิทธิ์** | `profiles` (role: customer/reseller/manager/superadmin) |
+| **สินค้า & หมวดหมู่** | `categories` · `products` · `product_variants` · `attribute_groups` · `attribute_options` · `category_attribute_groups` · `variant_attribute_values` · `product_views` |
+| **ตะกร้า & คำสั่งซื้อ** | `cart_items` · `orders` · `order_items` · `user_addresses` |
+| **ชำระเงิน** | `payments` · `payment_accounts` · `bank_chats` |
+| **โปรโมชัน & ชุดสินค้า** | `promotions` · `promotion_products` · `product_bundles` · `bundle_items` · `product_bundle_links` |
+| **หน้าแรก & แบนเนอร์** | `banners` · `homepage_sections` · `homepage_section_products` · `sub_category_items` · `category_shortcuts` · `site_config` |
+| **รีวิว / โปรด / แจ้งเตือน / feedback** | `reviews` · `user_favorites` · `notifications` · `feedbacks` |
+
+**ลำดับ migration**
+
+| ไฟล์ | เนื้อหา |
+| --- | --- |
+| `001_init.sql` | ตารางหลัก (profiles, categories, products, cart, reviews, orders, ...) |
+| `002_seed.sql` | ข้อมูลตัวอย่าง (สินค้า/หมวดหมู่) |
+| `003_address_order.sql` | `user_addresses` + ปรับ orders |
+| `004_payments.sql` | `payments` |
+| `005_payment_accounts.sql` · `006_seed_payment_account.sql` | บัญชีรับเงิน + seed |
+| `007_uat_support.sql` | รองรับโหมด UAT |
+| `008_roles.sql` | เปลี่ยน role เป็น customer/reseller/manager |
+| `009_notifications.sql` | `notifications` |
+| `010_favorites.sql` | `user_favorites` |
+| `011_seed_water_cycling.sql` · `012_seed_categories.sql` | seed สินค้า/หมวดหมู่เพิ่ม |
+| `013_superadmin_role.sql` | เพิ่ม role `superadmin` เข้า constraint |
+| `014_feedbacks.sql` | `feedbacks` |
+
+> ✅ migration `013` + `014` รันบน DB จริงแล้ว (ดูหัวข้อ "ตรวจสอบกับ DB จริงแล้ว")
+
 ## หมายเหตุการพัฒนา
 
 ระบบนี้ออกแบบเป็น full-stack web application โดย frontend เรียกข้อมูลผ่าน backend API และ backend เชื่อมต่อฐานข้อมูล Supabase หากต้องการนำไปใช้งานจริงควรตั้งค่า environment variables ให้ครบ ตรวจสอบสิทธิ์การเข้าถึงฐานข้อมูล และทดสอบ API ก่อน deploy
