@@ -1,3 +1,6 @@
 node_modules
 dist
 .env
+
+# LINE bot runtime storage (สร้างตอนรัน ไม่ต้อง track)
+line_storage_*.json
