@@ -488,6 +488,8 @@ flowchart LR
 
 ### 2. Class Diagram
 
+> เมธอดแสดง parameter และ return type ครบ (รวม `void`)
+
 ```mermaid
 classDiagram
     direction TB
@@ -500,46 +502,44 @@ classDiagram
         +string avatar_url
         +string role
         +bool is_active
-        +register()
-        +login()
-        +logout()
-        +getProfile()
-        +updateProfile()
-        +requestPasswordReset()
-        +refreshToken()
+        +register(data RegisterDto) AuthTokens
+        +login(email, password) AuthTokens
+        +logout(token) void
+        +getProfile(token) AuthUser
+        +updateProfile(token, data) AuthUser
+        +requestPasswordReset(email) void
+        +refreshToken(refreshToken) Tokens
     }
     class Customer {
-        +browseProducts()
-        +manageCart()
-        +manageFavorites()
-        +placeOrder()
-        +viewOrderHistory()
-        +writeReview()
+        +browseProducts(query) Product[]
+        +manageCart(item) void
+        +manageFavorites(productId) void
+        +placeOrder(payload) Order
+        +viewOrderHistory(token) Order[]
+        +writeReview(dto) Review
     }
     class Reseller {
-        +manageProduct()
-        +adjustStock()
-        +managePromotion()
-        +manageBundle()
-        +manageAttribute()
-        +manageOrder()
-        +verifyPayment()
-        +viewDashboard()
-        +viewAnalytics()
-        +manageNotification()
+        +manageProduct(dto) Product
+        +adjustStock(id, delta) void
+        +managePromotion(dto) Promotion
+        +manageBundle(dto) ProductBundle
+        +manageOrder(id, status) Order
+        +verifyPayment(paymentId) void
+        +viewDashboard() DashboardData
+        +viewAnalytics() AnalyticsData
     }
     class Manager {
-        +manageCategory()
-        +manageBanner()
-        +manageHomepage()
-        +manageUserAccount()
-        +managePaymentAccount()
+        +manageCategory(dto) Category
+        +manageBanner(dto) Banner
+        +manageHomepage(dto) HomepageSection
+        +manageUserAccount(id, data) User
+        +managePaymentAccount(dto) PaymentAccount
     }
     class SuperAdmin {
-        +createStaff()
-        +assignRole()
-        +setUserActive()
-        +viewSystemStats()
+        +createStaff(data) User
+        +assignRole(userId, role) User
+        +setUserActive(userId, active) void
+        +viewSystemStats() SystemStats
     }
 
     class Category {
@@ -550,13 +550,13 @@ classDiagram
         +uuid parent_id
         +int level
         +bool is_active
-        +getCategoryTree()
-        +getRootCategories()
-        +getChildren()
-        +getByRoutePath()
-        +createCategory()
-        +updateCategory()
-        +deleteCategory()
+        +getCategoryTree() Category[]
+        +getRootCategories() Category[]
+        +getChildren(parentId) Category[]
+        +getByRoutePath(routePath) CategoryFullData
+        +createCategory(dto) Category
+        +updateCategory(id, dto) Category
+        +deleteCategory(id) void
     }
     class Product {
         +uuid id
@@ -570,14 +570,14 @@ classDiagram
         +json images
         +int stock
         +bool is_featured
-        +getAllProducts()
-        +getProductById()
-        +getRelatedProducts()
-        +getProductsByCategory()
-        +createProduct()
-        +updateProduct()
-        +deleteProduct()
-        +adjustStock()
+        +getAllProducts(query) Product[]
+        +getProductById(id) Product
+        +getRelatedProducts(id) Product[]
+        +getProductsByCategory(categoryId) Product[]
+        +createProduct(dto) Product
+        +updateProduct(id, dto) Product
+        +deleteProduct(id) void
+        +adjustStock(id, delta) void
     }
     class ProductVariant {
         +uuid id
@@ -585,43 +585,42 @@ classDiagram
         +string sku
         +number price_override
         +int stock
-        +getVariantsByProduct()
-        +createVariant()
-        +updateVariant()
-        +deleteVariant()
+        +getVariantsByProduct(productId) ProductVariant[]
+        +createVariant(dto) ProductVariant
+        +updateVariant(id, dto) ProductVariant
+        +deleteVariant(id) void
     }
     class AttributeGroup {
         +uuid id
         +string name
-        +getAllGroups()
-        +getGroupById()
-        +createGroup()
-        +updateGroup()
-        +deleteGroup()
-        +getCategoryAttributes()
-        +linkCategoryAttribute()
-        +unlinkCategoryAttribute()
+        +getAllGroups() AttributeGroup[]
+        +getGroupById(id) AttributeGroup
+        +createGroup(dto) AttributeGroup
+        +updateGroup(id, dto) AttributeGroup
+        +deleteGroup(id) void
+        +linkCategoryAttribute(catId, groupId) void
+        +unlinkCategoryAttribute(catId, groupId) void
     }
     class AttributeOption {
         +uuid id
         +uuid group_id
         +string value
-        +getOptionsByGroup()
-        +createOption()
-        +updateOption()
-        +deleteOption()
+        +getOptionsByGroup(groupId) AttributeOption[]
+        +createOption(dto) AttributeOption
+        +updateOption(id, dto) AttributeOption
+        +deleteOption(id) void
     }
 
     class Cart {
         +uuid user_id
         +int totalItems
         +number totalPrice
-        +getCart()
-        +addItem()
-        +updateItem()
-        +removeItem()
-        +clearCart()
-        +getItemCount()
+        +getCart(userId) CartSummary
+        +addItem(userId, dto) CartItem[]
+        +updateItem(itemId, qty) CartItem[]
+        +removeItem(userId, itemId) CartItem[]
+        +clearCart(userId) void
+        +getItemCount(userId) int
     }
     class CartItem {
         +uuid id
@@ -634,11 +633,11 @@ classDiagram
     class Favorite {
         +List~FavoriteItem~ items
         +int totalItems
-        +isFavorite()
-        +addFavorite()
-        +removeFavorite()
-        +toggleFavorite()
-        +clearFavorites()
+        +isFavorite(id) bool
+        +addFavorite(item) void
+        +removeFavorite(id) void
+        +toggleFavorite(item) void
+        +clearFavorites() void
     }
     class FavoriteItem {
         +uuid product_id
@@ -653,11 +652,11 @@ classDiagram
         +uuid user_id
         +string status
         +number total
-        +createOrder()
-        +getOrderHistory()
-        +getOrderDetail()
-        +updateStatus()
-        +calculateTotal()
+        +createOrder(payload, token) Order
+        +getOrderHistory(token, page, limit) Order[]
+        +getOrderDetail(token, id) Order
+        +updateStatus(id, status) Order
+        +calculateTotal() number
     }
     class OrderItem {
         +uuid id
@@ -666,7 +665,7 @@ classDiagram
         +uuid variant_id
         +int quantity
         +number price
-        +getSubtotal()
+        +getSubtotal() number
     }
     class Payment {
         +uuid id
@@ -675,10 +674,21 @@ classDiagram
         +number amount
         +number ref_amount
         +string status
-        +createPayment()
-        +generateQR()
-        +checkStatus()
-        +confirm()
+        +createPayment(orderId, amount) Payment
+        +generateQR(payment) string
+        +checkStatus(paymentId) Payment
+        +confirm(paymentId) void
+    }
+    class PaymentAccount {
+        +uuid id
+        +string bank
+        +string account_no
+        +string promptpay_number
+        +bool is_active
+        +getAccounts() PaymentAccount[]
+        +createAccount(dto) PaymentAccount
+        +updateAccount(id, dto) PaymentAccount
+        +deleteAccount(id) void
     }
     class Address {
         +uuid id
@@ -687,11 +697,11 @@ classDiagram
         +string amphoe
         +string postal_code
         +bool is_default
-        +getAddresses()
-        +createAddress()
-        +updateAddress()
-        +deleteAddress()
-        +setDefault()
+        +getAddresses(token) Address[]
+        +createAddress(token, data) Address
+        +updateAddress(token, id, data) Address
+        +deleteAddress(token, id) void
+        +setDefault(id) void
     }
     class Review {
         +uuid id
@@ -701,10 +711,10 @@ classDiagram
         +string title
         +string comment
         +bool is_verified
-        +getReviewsByProduct()
-        +createReview()
-        +updateReview()
-        +deleteReview()
+        +getReviewsByProduct(productId, page, limit) Review[]
+        +createReview(userId, dto) Review
+        +updateReview(userId, id, dto) Review
+        +deleteReview(userId, id) void
     }
 
     class Banner {
@@ -713,10 +723,10 @@ classDiagram
         +string title
         +string image
         +int sort_order
-        +getBanners()
-        +createBanner()
-        +updateBanner()
-        +deleteBanner()
+        +getBanners(type) Banner[]
+        +createBanner(dto) Banner
+        +updateBanner(id, dto) Banner
+        +deleteBanner(id) void
     }
     class Promotion {
         +uuid id
@@ -725,30 +735,25 @@ classDiagram
         +number value
         +datetime start_at
         +datetime end_at
-        +getAll()
-        +getBySlug()
-        +getActiveDeals()
-        +getPromotionProducts()
-        +create()
-        +update()
-        +delete()
-        +addProduct()
-        +removeProduct()
+        +getActiveDeals() Promotion[]
+        +getBySlug(slug) Promotion
+        +create(dto) Promotion
+        +update(id, dto) Promotion
+        +delete(id) void
+        +addProduct(promoId, productId) void
+        +removeProduct(promoId, productId) void
     }
     class ProductBundle {
         +uuid id
         +string name
         +number bundle_price
-        +getAll()
-        +getActiveBundles()
-        +getBundlesForProduct()
-        +create()
-        +update()
-        +remove()
-        +addItem()
-        +removeItem()
-        +linkToProduct()
-        +unlinkFromProduct()
+        +getActiveBundles() ProductBundle[]
+        +getBundlesForProduct(productId) ProductBundle[]
+        +create(dto) ProductBundle
+        +update(id, dto) ProductBundle
+        +remove(id) void
+        +addItem(bundleId, productId) void
+        +removeItem(bundleId, productId) void
     }
     class HomepageSection {
         +uuid id
@@ -756,55 +761,18 @@ classDiagram
         +string type
         +uuid category_id
         +int sort_order
-        +getSections()
-        +getCategoryShortcuts()
-        +getConfig()
-        +createSection()
-        +updateSection()
-        +deleteSection()
-        +addProductToSection()
-        +removeProductFromSection()
+        +getSections() HomepageSection[]
+        +getConfig(key) SiteConfig
+        +createSection(dto) HomepageSection
+        +updateSection(id, dto) HomepageSection
+        +deleteSection(id) void
+        +addProductToSection(sectionId, productId) void
+        +removeProductFromSection(sectionId, productId) void
     }
     class Recommendation {
-        +trackView()
-        +getRecommendations()
-        +getTrending()
-    }
-    class ProductView {
-        +uuid id
-        +uuid user_id
-        +uuid product_id
-        +datetime viewed_at
-    }
-    class CategoryShortcut {
-        +uuid id
-        +string label
-        +string image
-        +string link
-        +int sort_order
-        +getAllShortcuts()
-        +createShortcut()
-        +updateShortcut()
-        +deleteShortcut()
-    }
-    class SiteConfig {
-        +string key
-        +string value
-        +getConfig()
-        +getAllConfig()
-        +updateConfig()
-        +deleteConfig()
-    }
-    class PaymentAccount {
-        +uuid id
-        +string bank
-        +string account_no
-        +string promptpay_number
-        +bool is_active
-        +getAccounts()
-        +createAccount()
-        +updateAccount()
-        +deleteAccount()
+        +trackView(userId, productId) void
+        +getRecommendations(productId) Product[]
+        +getTrending() Product[]
     }
     class Notification {
         +uuid id
@@ -812,26 +780,21 @@ classDiagram
         +string type
         +string message
         +bool is_read
-        +getNotifications()
-        +createNotification()
-        +markAsRead()
-        +remove()
-    }
-    class Dashboard {
-        +getSummary()
-        +getSalesOverview()
-        +getTopProducts()
-    }
-    class Analytics {
-        +getFull()
-        +getBehavior()
-        +getSalesByPeriod()
+        +getNotifications(userId) Notification[]
+        +createNotification(dto) Notification
+        +markAsRead(id) void
+        +remove(id) void
     }
     class Feedback {
+        +uuid id
+        +uuid user_id
         +int rating
         +string purpose
-        +bool achieved
-        +submitFeedback()
+        +string achieved
+        +string comment
+        +submitFeedback(payload, token) Feedback
+        +getAll(page, limit) Feedback[]
+        +getSummary() FeedbackSummary
     }
 
     User <|-- Customer
@@ -844,6 +807,7 @@ classDiagram
     Customer "1" --> "1" Cart
     Customer "1" --> "*" Review
     Customer "1" --> "1" Favorite
+    Customer "1" --> "*" Notification
     Favorite "1" --> "*" FavoriteItem
 
     Category "1" --> "*" Category
@@ -865,13 +829,9 @@ classDiagram
     Order "1" --> "*" OrderItem
     Order "1" --> "1" Payment
     Payment "*" --> "1" PaymentAccount
-    User "1" --> "*" Notification
 
     HomepageSection "1" --> "*" Product
     Recommendation ..> Product : แนะนำ
-    Recommendation "1" --> "*" ProductView
-    Product "1" --> "*" ProductView
-    Customer ..> Feedback : ส่งแบบประเมิน
 ```
 
 ### 3. Sequence Diagram
