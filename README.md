@@ -186,6 +186,7 @@ push งานขึ้น `main` แล้วนะครับ สรุปใ
 | --- | --- |
 | 🐛 **แก้บั๊ก role** | `008_roles.sql` ไม่มี `superadmin` ใน CHECK แต่โค้ดใช้อยู่ (`AuthPlugin`, `AuthSchema`, `seed-superadmin.ts`) → ตั้ง superadmin ไม่ได้ แก้ใน `sql/013_superadmin_role.sql` |
 | ✅ **ระบบรีวิว** | module `review` ครบชุด + หน้าสินค้าแสดงรีวิวจริง เขียน/ลบได้ มีกราฟแยกดาว และคำนวณค่าเฉลี่ยกลับไปที่ `products` อัตโนมัติ |
+| 🐛 **แก้บั๊กหมวดหมู่ซ้ำ** | หมวดย่อยที่ไม่มีสินค้าของตัวเองเด้งไปโชว์สินค้าของหมวดแม่ ทำให้หลายหมวดโชว์สินค้าชุดเดียวกัน (ดูเหมือนไม่แยกหมวด) — เอา logic fallback หมวดแม่ออกจาก `CategoryService.getCategoryProducts` ให้แต่ละหมวดโชว์เฉพาะ subtree ของตัวเอง |
 | 🐛 **แก้บั๊กตะกร้า** | ลบสินค้าแล้วเด้งกลับตอน refresh/เพิ่มสินค้าใหม่ — เกิดจาก race condition (ลบสินค้าที่เพิ่งเพิ่มก่อน API commit ทำให้ไม่ได้ยิง DELETE จริง) แก้โดยทำ mutation ตะกร้าเป็นคิวเรียงลำดับใน `CartContext` |
 | ✅ **ระบบ Feedback** | ตาราง `feedbacks` (migration `014`) + module `feedback` — ส่งได้ทั้งผู้ใช้ทั่วไปและสมาชิก, ดูผลสรุปได้ (reseller ขึ้นไป) |
 | ✅ **Helmet + Rate Limit** | เปิดใช้ผ่าน `SecurityPlugin` / `RateLimitPlugin` |

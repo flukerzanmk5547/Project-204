@@ -91,16 +91,10 @@ export class CategoryService extends BaseService<Category> {
       .order("created_at", { ascending: false })
       .limit(60);
 
-    const products = data ?? [];
-
-    // ถ้าหมวดนี้ (และหมวดย่อย) ไม่มีสินค้า ให้ดึงจากหมวดแม่ขึ้นไปแทน
-    // กันไม่ให้หน้า leaf ที่ไม่มีสินค้าตรงๆ ขึ้นว่าง
-    if (products.length === 0 && category.parent_id) {
-      const parent = await this.categoryRepo.findById(category.parent_id);
-      if (parent) return this.getCategoryProducts(parent);
-    }
-
-    return products;
+    // แสดงเฉพาะสินค้าของหมวดนี้ + หมวดย่อยทั้งหมด (subtree) เท่านั้น
+    // ไม่ fallback ไปดึงของหมวดแม่ เพราะจะทำให้หมวดย่อยที่ว่างโชว์สินค้าซ้ำกับหมวดอื่น
+    // (หน้าเว็บมี empty state + ลิงก์หมวดย่อยให้กดต่ออยู่แล้ว)
+    return data ?? [];
   }
 
   private async getAllDescendantIds(parentId: string): Promise<string[]> {
